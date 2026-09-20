@@ -86,7 +86,7 @@ Registra un nuevo usuario en la plataforma.
 
 ---
 
-## ⚡ Conexión por WebSockets
+## Conexión por WebSockets
 
 - **URL**: `ws://localhost:8080/api/app/panel-admin/viaje/tareas-viaje-telemetria`
 - **Protocolo**: Transmisión bidireccional JSON con actualización automática de posición GPS y lecturas de sensores.
