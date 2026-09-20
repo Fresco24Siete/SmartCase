@@ -4,7 +4,7 @@ Este documento detalla las especificaciones del módulo de hardware IoT basados 
 
 ---
 
-## 🧰 Especificaciones del Hardware IoT (ESP32)
+## Especificaciones del Hardware IoT (ESP32)
 
 El módulo físico está integrado en un contenedor isotérmico adaptado con enfriamiento termoeléctrico y sensores multivariable.
 
@@ -29,7 +29,7 @@ El módulo físico está integrado en un contenedor isotérmico adaptado con enf
 
 ---
 
-## 🗄️ Esquema de Base de Datos (PostgreSQL)
+## Esquema de Base de Datos (PostgreSQL)
 
 El esquema de persistencia relacional utiliza UUIDs v4 generados automáticamente mediante la extensión `pgcrypto`.
 
