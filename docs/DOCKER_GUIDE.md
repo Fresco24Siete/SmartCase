@@ -43,7 +43,7 @@ Utiliza una estrategia de compilación multi-etapa (*multi-stage build*):
 
 ---
 
-##  Comandos Útiles de Administración
+## Comandos Útiles de Administración
 
 ### Ver logs en tiempo real:
 ```bash
