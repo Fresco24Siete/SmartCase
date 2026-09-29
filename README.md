@@ -74,6 +74,3 @@ Para evitar un documento demasiado extenso, la información detallada del proyec
 
 ---
 
-## Licencia
-
-Este proyecto está licenciado bajo los términos de la licencia **MIT**. Consulta el archivo `LICENSE` para más información.
