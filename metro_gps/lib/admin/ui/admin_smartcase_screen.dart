@@ -125,7 +125,6 @@ class _AdminSmartCaseScreenState extends State<AdminSmartCaseScreen> {
       backgroundColor: AdminColors.surface,
       appBar: AppBar(
         title: const Text('SmartCase'),
-        backgroundColor: AdminColors.navy,
         actions: [
           IconButton(
             onPressed: _cargando ? null : _cargarLista,
@@ -138,7 +137,6 @@ class _AdminSmartCaseScreenState extends State<AdminSmartCaseScreen> {
         onPressed: _cargando ? null : () => _mostrarFormulario(),
         icon: const Icon(Icons.add),
         label: const Text('Nueva caja'),
-        backgroundColor: AdminColors.navy,
       ),
       body: _cargando
           ? const Center(child: CircularProgressIndicator())

@@ -114,7 +114,6 @@ Future<void> _mostrarFormulario({Clinica? clinica}) async {
       backgroundColor: AdminColors.surface,
       appBar: AppBar(
         title: const Text('Clínicas'),
-        backgroundColor: AdminColors.navy,
         actions: [
           IconButton(
             onPressed:
@@ -133,7 +132,6 @@ Future<void> _mostrarFormulario({Clinica? clinica}) async {
         onPressed: _cargando ? null : () => _mostrarFormulario(),
         icon: const Icon(Icons.add),
         label: const Text('Nueva clínica'),
-        backgroundColor: AdminColors.navy,
       ),
       body: _cargando
           ? const Center(child: CircularProgressIndicator())

@@ -161,7 +161,6 @@ class _AdminAmbulanciaScreenState extends State<AdminAmbulanciaScreen> {
       backgroundColor: AdminColors.surface,
       appBar: AppBar(
         title: const Text('Ambulancias'),
-        backgroundColor: AdminColors.navy,
         actions: [
           IconButton(
             onPressed: _cargando ? null : _cargarLista,
@@ -174,7 +173,6 @@ class _AdminAmbulanciaScreenState extends State<AdminAmbulanciaScreen> {
         onPressed: _cargando ? null : () => _mostrarFormulario(),
         icon: const Icon(Icons.add),
         label: const Text('Nueva ambulancia'),
-        backgroundColor: AdminColors.navy,
       ),
       body: _cargando
           ? const Center(child: CircularProgressIndicator())

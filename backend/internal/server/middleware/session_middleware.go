@@ -14,8 +14,12 @@ import (
 func RequiereAuth(rolRequerido string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		tokenString, err := c.Cookie("smart_session")
+		auth := c.GetHeader("Authorization")
+		println("[DEBUG AUTH] Request:", c.Request.Method, c.Request.URL.String())
+		println("[DEBUG AUTH] Cookie err:", err, "tokenString from cookie len:", len(tokenString))
+		println("[DEBUG AUTH] Authorization Header:", auth)
+
 		if err != nil || tokenString == "" {
-			auth := c.GetHeader("Authorization")
 			if strings.HasPrefix(auth, "Bearer ") {
 				tokenString = strings.TrimSpace(strings.TrimPrefix(auth, "Bearer "))
 			}
@@ -25,6 +29,7 @@ func RequiereAuth(rolRequerido string) gin.HandlerFunc {
 			tokenString = c.Query("token")
 		}
 		if tokenString == "" {
+			println("[DEBUG AUTH REJECT] No token in Cookie or Authorization header")
 			c.AbortWithStatus(http.StatusUnauthorized)
 			return
 		}
@@ -32,8 +37,9 @@ func RequiereAuth(rolRequerido string) gin.HandlerFunc {
 		//verificar que el token es valido
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (any, error) {
 			return []byte(os.Getenv("SECRET")), nil
-		},jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}))//aceptar header con algoritmo
+		}, jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}))
 		if err != nil {
+			println("[DEBUG AUTH REJECT] jwt.Parse failed:", err.Error(), "SECRET is:", os.Getenv("SECRET"))
 			c.AbortWithStatus(http.StatusUnauthorized)
 			return 
 		}

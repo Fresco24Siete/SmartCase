@@ -8,31 +8,10 @@ import '../../conductor/ui/conductor_home_screen.dart';
 import '../../receptor/ui/receptor_home_screen.dart';
 import '../../core/api_constants.dart';
 import '../../core/session_store.dart';
+import '../../core/theme/app_colors.dart';
 import '../auth_api.dart';
 import '../models/auth_models.dart';
 import '../models/usuario_rol_opciones.dart';
-
-// ─── Colores compartidos ──────────────────────────────────────────────────────
-
-const _kBlue = Color(0xFF1A73E8);
-const _kBlueLight = Color(0xFFF0F7FF);
-const _kBlueBorder = Color(0xFFB5D4F4);
-const _kBlueDark = Color(0xFF1565C0);
-const _kBlueSub = Color(0xFFB5D4F4);
-
-const _kGreen = Color(0xFF0F6E56);
-const _kGreenLight = Color(0xFFF0FBF7);
-const _kGreenBorder = Color(0xFF9FE1CB);
-const _kGreenDark = Color(0xFF085041);
-const _kGreenSub = Color(0xFF9FE1CB);
-
-const _kBg = Color(0xFFF4F6FA);
-const _kCard = Colors.white;
-const _kBorder = Color(0xFFE8ECF2);
-const _kTextPrimary = Color(0xFF1A1F36);
-const _kTextMuted = Color(0xFF8A94A6);
-
-// ─── Pantalla principal ───────────────────────────────────────────────────────
 
 class AuthTabsScreen extends StatefulWidget {
   const AuthTabsScreen({super.key});
@@ -91,111 +70,161 @@ class _AuthTabsScreenState extends State<AuthTabsScreen>
     }
   }
 
-  Color get _headerColor => _enLogin ? _kBlue : _kGreen;
-  Color get _headerDark => _enLogin ? _kBlueDark : _kGreenDark;
-  Color get _headerSub => _enLogin ? _kBlueSub : _kGreenSub;
+  @override
+  Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final isDesktop = size.width > 600;
+
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 28),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 440),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // ── Logo y encabezado minimalista ────────────────────────
+                  const _BrandHeader(),
+                  const SizedBox(height: 28),
+
+                  // ── Selector de pestañas segmentado (Pill minimalista) ─────
+                  _SegmentedTabPicker(
+                    index: _tabController.index,
+                    onTabSelected: (i) => _tabController.animateTo(i),
+                  ),
+                  const SizedBox(height: 20),
+
+                  // ── Contenedor de formulario principal ─────────────────────
+                  Container(
+                    decoration: BoxDecoration(
+                      color: AppColors.surface,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: AppColors.border),
+                    ),
+                    padding: EdgeInsets.all(isDesktop ? 28 : 20),
+                    child: AnimatedSize(
+                      duration: const Duration(milliseconds: 240),
+                      curve: Curves.easeInOutCubic,
+                      child: _enLogin
+                          ? _LoginForm(
+                              onRegistrarse: () => _tabController.animateTo(1),
+                            )
+                          : _RegisterForm(
+                              onIniciarSesion: () => _tabController.animateTo(0),
+                            ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
+                  // ── Pie de página sutil ──────────────────────────────────
+                  const Center(
+                    child: Text(
+                      'SmartCase Telemetry • Dispositivo y Transporte Seguro',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: AppColors.textMuted,
+                        letterSpacing: -0.2,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Cabecera de marca minimalista ──────────────────────────────────────────
+
+class _BrandHeader extends StatelessWidget {
+  const _BrandHeader();
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: _kBg,
-      body: Column(
-        children: [
-          // ── Cabecera coloreada ─────────────────────────────────────
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 280),
-            curve: Curves.easeInOut,
-            color: _headerColor,
-            padding: EdgeInsets.only(
-              top: MediaQuery.of(context).padding.top + 24,
-              left: 24,
-              right: 24,
-              bottom: 0,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 220),
-                  child: Container(
-                    key: ValueKey(_enLogin),
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: _enLogin
-                          ? const Color(0xFFE6F1FB)
-                          : const Color(0xFFE6F4EA),
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: Icon(
-                      _enLogin
-                          ? Icons.medical_services_outlined
-                          : Icons.person_add_outlined,
-                      size: 26,
-                      color: _headerColor,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 14),
-                AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 200),
-                  child: Text(
-                    key: ValueKey(_enLogin),
-                    _enLogin ? 'Bienvenido' : 'Crear cuenta',
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
-                      letterSpacing: -0.3,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  _enLogin
-                      ? 'Accede a tu cuenta para continuar'
-                      : 'Completa los datos para registrarte',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: _headerSub,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 20),
-
-                // ── Tabs ────────────────────────────────────────────
-                TabBar(
-                  controller: _tabController,
-                  indicator: UnderlineTabIndicator(
-                    borderSide: const BorderSide(color: Colors.white, width: 2),
-                    insets: const EdgeInsets.symmetric(horizontal: 12),
-                  ),
-                  labelColor: Colors.white,
-                  unselectedLabelColor: _headerSub,
-                  labelStyle: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                  ),
-                  unselectedLabelStyle: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                  ),
-                  tabs: const [
-                    Tab(text: 'Iniciar sesión'),
-                    Tab(text: 'Registro'),
-                  ],
-                ),
-              ],
+    return Column(
+      children: [
+        Container(
+          width: 54,
+          height: 54,
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.border),
+          ),
+          child: const Center(
+            child: Icon(
+              Icons.sensors_rounded,
+              color: AppColors.primary,
+              size: 28,
             ),
           ),
+        ),
+        const SizedBox(height: 14),
+        const Text(
+          'SmartCase',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.w700,
+            color: AppColors.textPrimary,
+            letterSpacing: -0.6,
+          ),
+        ),
+        const SizedBox(height: 4),
+        const Text(
+          'Cadena de custodia y telemetría en tiempo real',
+          style: TextStyle(
+            fontSize: 13,
+            color: AppColors.textSecondary,
+            letterSpacing: -0.2,
+          ),
+        ),
+      ],
+    );
+  }
+}
 
-          // ── Contenido ───────────────────────────────────────────────
+// ─── Selector Segmentado Tipo Pill ───────────────────────────────────────────
+
+class _SegmentedTabPicker extends StatelessWidget {
+  const _SegmentedTabPicker({
+    required this.index,
+    required this.onTabSelected,
+  });
+
+  final int index;
+  final ValueChanged<int> onTabSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 44,
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceSubtle,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.borderSubtle),
+      ),
+      child: Row(
+        children: [
           Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                _LoginForm(onRegistrarse: () => _tabController.animateTo(1)),
-                _RegisterForm(onIniciarSesion: () => _tabController.animateTo(0)),
-              ],
+            child: _SegmentItem(
+              label: 'Iniciar sesión',
+              isSelected: index == 0,
+              onTap: () => onTabSelected(0),
+            ),
+          ),
+          Expanded(
+            child: _SegmentItem(
+              label: 'Crear cuenta',
+              isSelected: index == 1,
+              onTap: () => onTabSelected(1),
             ),
           ),
         ],
@@ -204,7 +233,53 @@ class _AuthTabsScreenState extends State<AuthTabsScreen>
   }
 }
 
-// ─── Formulario de login ──────────────────────────────────────────────────────
+class _SegmentItem extends StatelessWidget {
+  const _SegmentItem({
+    required this.label,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.surface : Colors.transparent,
+          borderRadius: BorderRadius.circular(8),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.04),
+                    blurRadius: 4,
+                    offset: const Offset(0, 1),
+                  ),
+                ]
+              : null,
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+            color: isSelected ? AppColors.textPrimary : AppColors.textSecondary,
+            letterSpacing: -0.2,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Formulario de Login ──────────────────────────────────────────────────────
 
 class _LoginForm extends StatefulWidget {
   const _LoginForm({required this.onRegistrarse});
@@ -226,7 +301,6 @@ class _LoginFormState extends State<_LoginForm> {
   void dispose() {
     _email.dispose();
     _password.dispose();
-    _api.close();
     super.dispose();
   }
 
@@ -277,8 +351,10 @@ class _LoginFormState extends State<_LoginForm> {
           );
         }
       } else {
-        _showSnack(res.errorMessage ?? 'Error (${res.statusCode})',
-            isError: true);
+        _showSnack(
+          res.errorMessage ?? 'Error (${res.statusCode})',
+          isError: true,
+        );
       }
     } catch (e) {
       if (!mounted) return;
@@ -295,88 +371,77 @@ class _LoginFormState extends State<_LoginForm> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(msg),
-        backgroundColor: isError ? const Color(0xFFB71C1C) : _kBlue,
+        backgroundColor: isError ? AppColors.error : AppColors.primary,
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        margin: const EdgeInsets.all(16),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
-      child: Form(
-        key: _formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _AuthCard(
-              children: [
-                _AuthField(
-                  controller: _email,
-                  label: 'Correo electrónico',
-                  hint: 'usuario@clinica.com',
-                  icon: Icons.alternate_email_rounded,
-                  keyboardType: TextInputType.emailAddress,
-                  textInputAction: TextInputAction.next,
-                  autofillHints: const [AutofillHints.email],
-                  accentColor: _kBlue,
-                  validator: (v) => (v == null || v.trim().isEmpty)
-                      ? 'Ingresa el correo'
-                      : null,
-                ),
-                const SizedBox(height: 16),
-                _AuthField(
-                  controller: _password,
-                  label: 'Contraseña',
-                  hint: '••••••••',
-                  icon: Icons.lock_outline_rounded,
-                  obscureText: _ocultarPassword,
-                  accentColor: _kBlue,
-                  textInputAction: TextInputAction.done,
-                  onFieldSubmitted: (_) {
-                    if (!_cargando) _enviar();
-                  },
-                  suffixIcon: IconButton(
-                    onPressed: () =>
-                        setState(() => _ocultarPassword = !_ocultarPassword),
-                    icon: Icon(
-                      _ocultarPassword
-                          ? Icons.visibility_outlined
-                          : Icons.visibility_off_outlined,
-                      size: 18,
-                      color: _kTextMuted,
-                    ),
-                  ),
-                  validator: (v) =>
-                      (v == null || v.isEmpty) ? 'Ingresa la contraseña' : null,
-                ),
-                const SizedBox(height: 24),
-                _AuthButton(
-                  label: 'Entrar',
-                  color: _kBlue,
-                  cargando: _cargando,
-                  onPressed: _enviar,
-                ),
-              ],
+    return Form(
+      key: _formKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _MinimalField(
+            controller: _email,
+            label: 'Correo electrónico',
+            hint: 'usuario@clinica.com',
+            icon: Icons.mail_outline_rounded,
+            keyboardType: TextInputType.emailAddress,
+            textInputAction: TextInputAction.next,
+            autofillHints: const [AutofillHints.email],
+            validator: (v) => (v == null || v.trim().isEmpty)
+                ? 'Ingresa tu correo'
+                : null,
+          ),
+          const SizedBox(height: 16),
+          _MinimalField(
+            controller: _password,
+            label: 'Contraseña',
+            hint: '••••••••',
+            icon: Icons.lock_outline_rounded,
+            obscureText: _ocultarPassword,
+            textInputAction: TextInputAction.done,
+            onFieldSubmitted: (_) {
+              if (!_cargando) _enviar();
+            },
+            suffixIcon: IconButton(
+              splashRadius: 18,
+              onPressed: () =>
+                  setState(() => _ocultarPassword = !_ocultarPassword),
+              icon: Icon(
+                _ocultarPassword
+                    ? Icons.visibility_outlined
+                    : Icons.visibility_off_outlined,
+                size: 18,
+                color: AppColors.textMuted,
+              ),
             ),
-            const SizedBox(height: 16),
-            _FooterLink(
-              texto: '¿No tienes cuenta?',
-              accion: 'Regístrate',
-              color: _kBlue,
-              onTap: widget.onRegistrarse,
-            ),
-          ],
-        ),
+            validator: (v) =>
+                (v == null || v.isEmpty) ? 'Ingresa la contraseña' : null,
+          ),
+          const SizedBox(height: 24),
+          _PrimaryActionButton(
+            label: 'Entrar',
+            isLoading: _cargando,
+            onPressed: _enviar,
+          ),
+          const SizedBox(height: 16),
+          _AuthFooterText(
+            prompt: '¿No tienes cuenta aún?',
+            action: 'Crear cuenta',
+            onTap: widget.onRegistrarse,
+          ),
+        ],
       ),
     );
   }
 }
 
-// ─── Formulario de registro ───────────────────────────────────────────────────
+// ─── Formulario de Registro ──────────────────────────────────────────────────
 
 class _RegisterForm extends StatefulWidget {
   const _RegisterForm({required this.onIniciarSesion});
@@ -401,7 +466,6 @@ class _RegisterFormState extends State<_RegisterForm> {
     _nombreCompleto.dispose();
     _email.dispose();
     _password.dispose();
-    _api.close();
     super.dispose();
   }
 
@@ -418,18 +482,17 @@ class _RegisterFormState extends State<_RegisterForm> {
     );
     if (!mounted) return;
     setState(() => _cargando = false);
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
           res.isSuccess
-              ? 'Registro exitoso'
+              ? 'Cuenta creada con éxito. Inicia sesión.'
               : (res.errorMessage ?? 'Error (${res.statusCode})'),
         ),
-        backgroundColor:
-            res.isSuccess ? _kGreen : const Color(0xFFB71C1C),
+        backgroundColor: res.isSuccess ? AppColors.success : AppColors.error,
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        margin: const EdgeInsets.all(16),
       ),
     );
     if (res.isSuccess) widget.onIniciarSesion();
@@ -437,194 +500,147 @@ class _RegisterFormState extends State<_RegisterForm> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
-      child: Form(
-        key: _formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _AuthCard(
-              children: [
-                // Nombre
-                _AuthField(
-                  controller: _nombreCompleto,
-                  label: 'Nombre completo',
-                  hint: 'Ej. María González',
-                  icon: Icons.person_outline_rounded,
-                  accentColor: _kGreen,
-                  textCapitalization: TextCapitalization.words,
-                  textInputAction: TextInputAction.next,
-                  validator: (v) => (v == null || v.trim().isEmpty)
-                      ? 'Ingresa el nombre completo'
-                      : null,
-                ),
-                const SizedBox(height: 16),
-
-                // Rol
-                _FieldLabel(label: 'Rol', icon: Icons.badge_outlined),
-                const SizedBox(height: 8),
-                Row(
-                  children: UsuarioRolBd.todos.map((r) {
-                    final seleccionado = _rol == r;
-                    return Expanded(
-                      child: GestureDetector(
-                        onTap: _cargando
-                            ? null
-                            : () => setState(() => _rol = r),
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 180),
-                          margin: EdgeInsets.only(
-                            right: r == UsuarioRolBd.todos.last ? 0 : 8,
-                          ),
-                          padding: const EdgeInsets.symmetric(vertical: 10),
-                          decoration: BoxDecoration(
-                            color: seleccionado
-                                ? _kGreenLight
-                                : Colors.transparent,
-                            border: Border.all(
-                              color:
-                                  seleccionado ? _kGreen : _kBorder,
-                              width: seleccionado ? 1.5 : 1,
-                            ),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          alignment: Alignment.center,
-                          child: Text(
-                            UsuarioRolBd.etiqueta(r),
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: seleccionado ? _kGreen : _kTextMuted,
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                ),
-                const SizedBox(height: 16),
-
-                // Email
-                _AuthField(
-                  controller: _email,
-                  label: 'Correo electrónico',
-                  hint: 'correo@ejemplo.com',
-                  icon: Icons.alternate_email_rounded,
-                  accentColor: _kGreen,
-                  keyboardType: TextInputType.emailAddress,
-                  textInputAction: TextInputAction.next,
-                  autofillHints: const [AutofillHints.email],
-                  validator: (v) => (v == null || v.trim().isEmpty)
-                      ? 'Ingresa el correo'
-                      : null,
-                ),
-                const SizedBox(height: 16),
-
-                // Contraseña
-                _AuthField(
-                  controller: _password,
-                  label: 'Contraseña',
-                  hint: '••••••••',
-                  icon: Icons.lock_outline_rounded,
-                  accentColor: _kGreen,
-                  obscureText: _ocultarPassword,
-                  textInputAction: TextInputAction.done,
-                  onFieldSubmitted: (_) {
-                    if (!_cargando) _enviar();
-                  },
-                  suffixIcon: IconButton(
-                    onPressed: () =>
-                        setState(() => _ocultarPassword = !_ocultarPassword),
-                    icon: Icon(
-                      _ocultarPassword
-                          ? Icons.visibility_outlined
-                          : Icons.visibility_off_outlined,
-                      size: 18,
-                      color: _kTextMuted,
-                    ),
-                  ),
-                  validator: (v) =>
-                      (v == null || v.isEmpty) ? 'Ingresa la contraseña' : null,
-                ),
-                const SizedBox(height: 24),
-                _AuthButton(
-                  label: 'Crear cuenta',
-                  color: _kGreen,
-                  cargando: _cargando,
-                  onPressed: _enviar,
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            _FooterLink(
-              texto: '¿Ya tienes cuenta?',
-              accion: 'Inicia sesión',
-              color: _kGreen,
-              onTap: widget.onIniciarSesion,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ─── Componentes compartidos ──────────────────────────────────────────────────
-
-class _AuthCard extends StatelessWidget {
-  const _AuthCard({required this.children});
-  final List<Widget> children;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: _kCard,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: _kBorder),
-      ),
+    return Form(
+      key: _formKey,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: children,
+        children: [
+          _MinimalField(
+            controller: _nombreCompleto,
+            label: 'Nombre completo',
+            hint: 'Ej. Dra. Camila Rojas',
+            icon: Icons.person_outline_rounded,
+            textCapitalization: TextCapitalization.words,
+            textInputAction: TextInputAction.next,
+            validator: (v) => (v == null || v.trim().isEmpty)
+                ? 'Ingresa el nombre completo'
+                : null,
+          ),
+          const SizedBox(height: 16),
+
+          // Selector de rol minimalista
+          const Text(
+            'Rol en el sistema',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textSecondary,
+              letterSpacing: -0.2,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: UsuarioRolBd.todos.map((r) {
+              final isSelected = _rol == r;
+              return Expanded(
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    right: r == UsuarioRolBd.todos.last ? 0 : 8,
+                  ),
+                  child: InkWell(
+                    onTap: _cargando ? null : () => setState(() => _rol = r),
+                    borderRadius: BorderRadius.circular(10),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 160),
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? AppColors.primarySubtle
+                            : AppColors.surfaceSubtle,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: isSelected
+                              ? AppColors.primaryAccent
+                              : AppColors.borderSubtle,
+                          width: isSelected ? 1.5 : 1,
+                        ),
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(
+                        UsuarioRolBd.etiqueta(r),
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                          color: isSelected
+                              ? AppColors.primaryAccent
+                              : AppColors.textSecondary,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 16),
+
+          _MinimalField(
+            controller: _email,
+            label: 'Correo electrónico',
+            hint: 'correo@ejemplo.com',
+            icon: Icons.mail_outline_rounded,
+            keyboardType: TextInputType.emailAddress,
+            textInputAction: TextInputAction.next,
+            autofillHints: const [AutofillHints.email],
+            validator: (v) => (v == null || v.trim().isEmpty)
+                ? 'Ingresa el correo'
+                : null,
+          ),
+          const SizedBox(height: 16),
+
+          _MinimalField(
+            controller: _password,
+            label: 'Contraseña',
+            hint: 'Mínimo 6 caracteres',
+            icon: Icons.lock_outline_rounded,
+            obscureText: _ocultarPassword,
+            textInputAction: TextInputAction.done,
+            onFieldSubmitted: (_) {
+              if (!_cargando) _enviar();
+            },
+            suffixIcon: IconButton(
+              splashRadius: 18,
+              onPressed: () =>
+                  setState(() => _ocultarPassword = !_ocultarPassword),
+              icon: Icon(
+                _ocultarPassword
+                    ? Icons.visibility_outlined
+                    : Icons.visibility_off_outlined,
+                size: 18,
+                color: AppColors.textMuted,
+              ),
+            ),
+            validator: (v) =>
+                (v == null || v.isEmpty) ? 'Ingresa la contraseña' : null,
+          ),
+          const SizedBox(height: 24),
+
+          _PrimaryActionButton(
+            label: 'Crear cuenta',
+            isLoading: _cargando,
+            onPressed: _enviar,
+          ),
+          const SizedBox(height: 16),
+
+          _AuthFooterText(
+            prompt: '¿Ya estás registrado?',
+            action: 'Inicia sesión',
+            onTap: widget.onIniciarSesion,
+          ),
+        ],
       ),
     );
   }
 }
 
-class _FieldLabel extends StatelessWidget {
-  const _FieldLabel({required this.label, required this.icon});
-  final String label;
-  final IconData icon;
+// ─── Campo de entrada minimalista ─────────────────────────────────────────────
 
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Icon(icon, size: 13, color: _kTextMuted),
-        const SizedBox(width: 5),
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w700,
-            color: _kTextMuted,
-            letterSpacing: 0.3,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _AuthField extends StatelessWidget {
-  const _AuthField({
+class _MinimalField extends StatelessWidget {
+  const _MinimalField({
     required this.controller,
     required this.label,
     required this.hint,
     required this.icon,
-    required this.accentColor,
     this.obscureText = false,
     this.keyboardType,
     this.textInputAction,
@@ -639,7 +655,6 @@ class _AuthField extends StatelessWidget {
   final String label;
   final String hint;
   final IconData icon;
-  final Color accentColor;
   final bool obscureText;
   final TextInputType? keyboardType;
   final TextInputAction? textInputAction;
@@ -654,8 +669,16 @@ class _AuthField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _FieldLabel(label: label, icon: icon),
-        const SizedBox(height: 7),
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: AppColors.textSecondary,
+            letterSpacing: -0.2,
+          ),
+        ),
+        const SizedBox(height: 6),
         TextFormField(
           controller: controller,
           obscureText: obscureText,
@@ -667,48 +690,16 @@ class _AuthField extends StatelessWidget {
           validator: validator,
           style: const TextStyle(
             fontSize: 14,
-            color: _kTextPrimary,
             fontWeight: FontWeight.w500,
+            color: AppColors.textPrimary,
           ),
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: const TextStyle(
-              fontSize: 14,
-              color: _kTextMuted,
-              fontWeight: FontWeight.w400,
-            ),
-            prefixIcon: Icon(icon, size: 18, color: _kTextMuted),
+            prefixIcon: Icon(icon, size: 18, color: AppColors.textMuted),
             suffixIcon: suffixIcon,
             filled: true,
-            fillColor: _kBg,
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: _kBorder),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: _kBorder),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: accentColor, width: 1.5),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide:
-                  const BorderSide(color: Color(0xFFE53935), width: 1.5),
-            ),
-            focusedErrorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide:
-                  const BorderSide(color: Color(0xFFE53935), width: 1.5),
-            ),
-            errorStyle: const TextStyle(
-              fontSize: 11,
-              color: Color(0xFFE53935),
-            ),
+            fillColor: AppColors.surface,
+            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
           ),
         ),
       ],
@@ -716,83 +707,91 @@ class _AuthField extends StatelessWidget {
   }
 }
 
-class _AuthButton extends StatelessWidget {
-  const _AuthButton({
+// ─── Botón Principal Minimalista ──────────────────────────────────────────────
+
+class _PrimaryActionButton extends StatelessWidget {
+  const _PrimaryActionButton({
     required this.label,
-    required this.color,
-    required this.cargando,
+    required this.isLoading,
     required this.onPressed,
   });
 
   final String label;
-  final Color color;
-  final bool cargando;
+  final bool isLoading;
   final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 50,
+      height: 48,
       child: FilledButton(
-        onPressed: cargando ? null : onPressed,
+        onPressed: isLoading ? null : onPressed,
         style: FilledButton.styleFrom(
-          backgroundColor: color,
-          disabledBackgroundColor: color.withOpacity(0.5),
+          backgroundColor: AppColors.primary,
+          foregroundColor: AppColors.textInverse,
+          disabledBackgroundColor: AppColors.primary.withOpacity(0.6),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(12),
           ),
-          textStyle: const TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 0.2,
-          ),
+          elevation: 0,
         ),
-        child: cargando
+        child: isLoading
             ? const SizedBox(
-                width: 22,
-                height: 22,
+                width: 20,
+                height: 20,
                 child: CircularProgressIndicator(
-                  strokeWidth: 2.5,
+                  strokeWidth: 2,
                   color: Colors.white,
                 ),
               )
-            : Text(label),
+            : Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: -0.2,
+                ),
+              ),
       ),
     );
   }
 }
 
-class _FooterLink extends StatelessWidget {
-  const _FooterLink({
-    required this.texto,
-    required this.accion,
-    required this.color,
+// ─── Enlace de pie de formulario ──────────────────────────────────────────────
+
+class _AuthFooterText extends StatelessWidget {
+  const _AuthFooterText({
+    required this.prompt,
+    required this.action,
     required this.onTap,
   });
 
-  final String texto;
-  final String accion;
-  final Color color;
+  final String prompt;
+  final String action;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return InkWell(
       onTap: onTap,
-      child: RichText(
-        textAlign: TextAlign.center,
-        text: TextSpan(
-          style: const TextStyle(fontSize: 13, color: _kTextMuted),
-          children: [
-            TextSpan(text: '$texto '),
-            TextSpan(
-              text: accion,
-              style: TextStyle(
-                color: color,
-                fontWeight: FontWeight.w700,
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: RichText(
+          textAlign: TextAlign.center,
+          text: TextSpan(
+            style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+            children: [
+              TextSpan(text: '$prompt '),
+              TextSpan(
+                text: action,
+                style: const TextStyle(
+                  color: AppColors.primaryAccent,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

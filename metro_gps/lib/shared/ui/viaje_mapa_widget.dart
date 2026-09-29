@@ -11,6 +11,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../../conductor/models/telemetria.dart';
+import '../../core/theme/app_colors.dart';
 
 class ViajeMapa extends StatefulWidget {
   const ViajeMapa({super.key, required this.registros, this.height = 280});
@@ -61,10 +62,15 @@ class _ViajeMapaState extends State<ViajeMapa> {
     final puntos = _puntos;
     final sinDatos = puntos.isEmpty;
 
-    return SizedBox(
+    return Container(
       height: widget.height,
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.border),
+      ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(15),
         child: Stack(
           children: [
             // ── Mapa base ────────────────────────────────────────────────
@@ -85,69 +91,76 @@ class _ViajeMapaState extends State<ViajeMapa> {
                   maxZoom: 19,
                 ),
 
-                // Línea de recorrido
+                // Línea de recorrido minimalista
                 if (puntos.length > 1)
                   PolylineLayer(
                     polylines: [
                       Polyline(
                         points: puntos,
-                        strokeWidth: 3.5,
-                        color: const Color(0xFF1A73E8),
+                        strokeWidth: 3.0,
+                        color: AppColors.primaryAccent,
                       ),
                     ],
                   ),
 
-                // Marcadores: puntos intermedios (azul pequeño) + último (rojo)
-                MarkerLayer(
-                  markers: [
-                    // Puntos de ruta anteriores
-                    for (final p in puntos.take(
-                      puntos.length > 1 ? puntos.length - 1 : 0,
-                    ))
-                      Marker(
-                        point: p,
-                        width: 10,
-                        height: 10,
-                        child: Container(
-                          decoration: const BoxDecoration(
-                            color: Color(0xFF1A73E8),
-                            shape: BoxShape.circle,
+                // Marcadores: puntos intermedios + último
+                if (_conGps.isNotEmpty)
+                  MarkerLayer(
+                    markers: [
+                      // Puntos intermedios
+                      ..._conGps.take(_conGps.length - 1).map(
+                            (r) => Marker(
+                              point: LatLng(r.latitud, r.longitud),
+                              width: 8,
+                              height: 8,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: AppColors.primaryAccent.withOpacity(0.6),
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
-
-                    // Último punto conocido (posición actual)
-                    if (puntos.isNotEmpty)
+                      // Último punto (posición actual)
                       Marker(
-                        point: puntos.last,
-                        width: 36,
-                        height: 36,
+                        point: _centro,
+                        width: 40,
+                        height: 40,
                         child: const _PosicionActualPin(),
                       ),
-                  ],
-                ),
+                    ],
+                  ),
               ],
             ),
 
-            // ── Overlay: sin datos GPS ───────────────────────────────────
+            // ── Overlay "Sin datos GPS" ──────────────────────────────────
             if (sinDatos)
               Container(
-                color: const Color(0xFFF4F6FA).withOpacity(0.85),
+                color: Colors.white.withOpacity(0.85),
                 alignment: Alignment.center,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(
-                      Icons.location_off_outlined,
-                      size: 36,
-                      color: Colors.grey.shade400,
+                    Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: AppColors.surfaceSubtle,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: AppColors.border),
+                      ),
+                      child: const Icon(
+                        Icons.location_off_rounded,
+                        size: 22,
+                        color: AppColors.textMuted,
+                      ),
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Sin coordenadas GPS aún',
+                    const SizedBox(height: 10),
+                    const Text(
+                      'Esperando coordenadas GPS…',
                       style: TextStyle(
                         fontSize: 13,
-                        color: Colors.grey.shade500,
+                        color: AppColors.textSecondary,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -167,7 +180,7 @@ class _ViajeMapaState extends State<ViajeMapa> {
                 ),
               ),
 
-            // ── Atribución OSM (requerida por la licencia) ───────────────
+            // ── Atribución OSM ───────────────────────────────────────────
             Positioned(
               bottom: 4,
               left: 8,
@@ -175,7 +188,7 @@ class _ViajeMapaState extends State<ViajeMapa> {
                 '© OpenStreetMap contributors',
                 style: TextStyle(
                   fontSize: 9,
-                  color: Colors.black.withOpacity(0.5),
+                  color: Colors.black.withOpacity(0.4),
                 ),
               ),
             ),
@@ -196,28 +209,28 @@ class _PosicionActualPin extends StatelessWidget {
     return Stack(
       alignment: Alignment.center,
       children: [
-        // Halo exterior
+        // Halo exterior sutil
         Container(
           width: 36,
           height: 36,
           decoration: BoxDecoration(
-            color: const Color(0xFFE53935).withOpacity(0.2),
+            color: AppColors.primaryAccent.withOpacity(0.18),
             shape: BoxShape.circle,
           ),
         ),
         // Punto central
         Container(
-          width: 16,
-          height: 16,
+          width: 14,
+          height: 14,
           decoration: BoxDecoration(
-            color: const Color(0xFFE53935),
+            color: AppColors.primaryAccent,
             shape: BoxShape.circle,
-            border: Border.all(color: Colors.white, width: 2.5),
+            border: Border.all(color: Colors.white, width: 2),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.25),
+                color: Colors.black.withOpacity(0.15),
                 blurRadius: 4,
-                offset: const Offset(0, 2),
+                offset: const Offset(0, 1),
               ),
             ],
           ),
@@ -251,16 +264,17 @@ class _MapButton extends StatelessWidget {
           height: 36,
           decoration: BoxDecoration(
             color: Colors.white,
-            shape: BoxShape.circle,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: AppColors.border),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.18),
-                blurRadius: 6,
+                color: Colors.black.withOpacity(0.06),
+                blurRadius: 4,
                 offset: const Offset(0, 2),
               ),
             ],
           ),
-          child: Icon(icon, size: 18, color: const Color(0xFF1A73E8)),
+          child: Icon(icon, size: 18, color: AppColors.textPrimary),
         ),
       ),
     );

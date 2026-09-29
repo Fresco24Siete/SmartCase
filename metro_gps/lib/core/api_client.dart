@@ -17,11 +17,22 @@ class ApiClient {
   final String _baseUrl;
 
   String? _sessionCookie;
+  String? _token;
 
-  bool get hasSession => _sessionCookie != null;
+  /// Retorna verdadero únicamente si existe un token JWT válido y no vacío.
+  bool get hasSession {
+    final t = token;
+    return t != null && t.trim().isNotEmpty;
+  }
 
   /// Cookie lista para el header `Cookie` (p. ej. `smart_session=...`).
   String? get sessionCookie => _sessionCookie;
+
+  /// Token JWT activo para autenticación.
+  String? get token {
+    if (_token != null && _token!.trim().isNotEmpty) return _token!.trim();
+    return _tokenFromCookie(_sessionCookie);
+  }
 
   static String _trimTrailingSlash(String url) {
     if (url.endsWith('/')) {
@@ -37,7 +48,11 @@ class ApiClient {
       'Content-Type': 'application/json; charset=utf-8',
       'Accept': 'application/json',
     };
-    if (_sessionCookie != null) {
+    final effectiveToken = token;
+    if (effectiveToken != null && effectiveToken.isNotEmpty) {
+      headers['Authorization'] = 'Bearer $effectiveToken';
+    }
+    if (_sessionCookie != null && _sessionCookie!.isNotEmpty) {
       headers['Cookie'] = _sessionCookie!;
     }
     return headers;
@@ -46,33 +61,37 @@ class ApiClient {
   /// Restaura sesión guardada tras reiniciar la app.
   Future<void> loadSavedSession() async {
     final token = await SessionPersistence.loadToken();
-    if (token == null) return;
-    _applyToken(token);
-    _syncSessionStoreFromToken(token);
+    if (token == null || token.trim().isEmpty) return;
+    _applyToken(token.trim());
+    _syncSessionStoreFromToken(token.trim());
   }
 
   void setSessionToken(String token) {
     _applyToken(token);
-    SessionPersistence.saveToken(_tokenFromCookie(_sessionCookie!)!);
+    SessionPersistence.saveToken(token);
     _syncSessionStoreFromToken(token);
   }
 
   Future<void> clearSession() async {
+    _token = null;
     _sessionCookie = null;
     await SessionPersistence.clear();
     SessionStore.instance.clear();
   }
 
   void _applyToken(String token) {
+    _token = token;
     _sessionCookie = 'smart_session=$token';
   }
 
-  static String? _tokenFromCookie(String cookie) {
+  static String? _tokenFromCookie(String? cookie) {
+    if (cookie == null || cookie.trim().isEmpty) return null;
     const prefix = 'smart_session=';
-    if (cookie.startsWith(prefix)) {
-      return cookie.substring(prefix.length);
+    var clean = cookie.trim();
+    if (clean.startsWith(prefix)) {
+      clean = clean.substring(prefix.length).trim();
     }
-    return cookie.isEmpty ? null : cookie;
+    return clean.isEmpty ? null : clean;
   }
 
   void _syncSessionStoreFromToken(String token) {
@@ -92,6 +111,13 @@ class ApiClient {
       return;
     }
     _absorbSessionCookie(response);
+  }
+
+  void _onResponse(http.Response response) {
+    _absorbSessionCookie(response);
+    if (response.statusCode == 401) {
+      clearSession();
+    }
   }
 
   void _absorbSessionCookie(http.Response response) {
@@ -131,13 +157,13 @@ class ApiClient {
       headers: jsonHeaders,
       body: body,
     );
-    _absorbSessionCookie(response);
+    _onResponse(response);
     return response;
   }
 
   Future<http.Response> get(String path) async {
     final response = await _client.get(uri(path), headers: jsonHeaders);
-    _absorbSessionCookie(response);
+    _onResponse(response);
     return response;
   }
 
@@ -150,7 +176,7 @@ class ApiClient {
       headers: jsonHeaders,
       body: body,
     );
-    _absorbSessionCookie(response);
+    _onResponse(response);
     return response;
   }
 
@@ -166,7 +192,7 @@ class ApiClient {
     }
     final streamed = await _client.send(request);
     final response = await http.Response.fromStream(streamed);
-    _absorbSessionCookie(response);
+    _onResponse(response);
     return response;
   }
 

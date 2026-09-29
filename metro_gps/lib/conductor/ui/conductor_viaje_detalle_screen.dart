@@ -12,6 +12,7 @@ import '../models/telemetria.dart';
 import '../models/viaje.dart';
 import '../telemetria_local_store.dart';
 import '../telemetria_sync_service.dart';
+import '../../core/theme/app_colors.dart';
 
 class ConductorViajeDetalleScreen extends StatefulWidget {
   const ConductorViajeDetalleScreen({super.key, required this.viaje});
@@ -246,37 +247,75 @@ class _ConductorViajeDetalleScreenState
   Color _sensorColor(double value, double max,
       {double warnPct = 0.6, double dangerPct = 0.85}) {
     final pct = (value / max).clamp(0.0, 1.0);
-    if (pct >= dangerPct) return const Color(0xFFE24B4A);
-    if (pct >= warnPct) return const Color(0xFFEF9F27);
-    return const Color(0xFF1D9E75);
+    if (pct >= dangerPct) return AppColors.error;
+    if (pct >= warnPct) return AppColors.warning;
+    return AppColors.success;
   }
 
   @override
   Widget build(BuildContext context) {
     final v = widget.viaje;
     final p = _bt.lastPacket;
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text('Viaje ${v.idCorto}'),
-        // ── Botón de cambiar estado ELIMINADO ─────────────────────────────
+        backgroundColor: AppColors.surface,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            size: 16,
+            color: AppColors.textPrimary,
+          ),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Viaje #${v.idCorto}',
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textPrimary,
+                letterSpacing: -0.3,
+              ),
+            ),
+            const Text(
+              'Monitoreo del Conductor',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w400,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ],
+        ),
         actions: [
           IconButton(
             tooltip: 'Entrada manual',
             onPressed: _mostrarFormularioManual,
-            icon: const Icon(Icons.edit_note_outlined),
+            icon: const Icon(Icons.edit_note_outlined, size: 22, color: AppColors.textPrimary),
           ),
+          const SizedBox(width: 4),
         ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(color: AppColors.border, height: 1),
+        ),
       ),
       bottomNavigationBar: _BottomBar(
         onBluetooth: () => _mostrarPanelBluetooth(context),
       ),
-      body: ListView(
-        padding: const EdgeInsets.only(bottom: 24),
-        children: [
-          _ViajeInfoCard(viaje: v),
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 800),
+          child: ListView(
+            padding: const EdgeInsets.only(bottom: 24),
+            children: [
+              _ViajeInfoCard(viaje: v),
 
           const _SectionLabel(label: 'Verificación de entrega'),
           // ── onPinValido conecta el PIN con actualizarEstadoViaje ──────────
@@ -361,16 +400,19 @@ class _ConductorViajeDetalleScreenState
               child: Container(
                 height: 80,
                 decoration: BoxDecoration(
-                  color: colorScheme.surfaceContainerHighest
-                      .withValues(alpha: 0.5),
+                  color: AppColors.surface,
                   borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppColors.border),
                 ),
                 alignment: Alignment.center,
                 child: Text(
                   _bt.isConnected
                       ? 'Esperando primera lectura del ESP32…'
                       : 'Conecta el ESP32 para ver sensores en vivo',
-                  style: textTheme.bodySmall,
+                  style: const TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 13,
+                  ),
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -396,8 +438,10 @@ class _ConductorViajeDetalleScreenState
           _TelemetriaTable(registros: _registros),
         ],
       ),
-    );
-  }
+    ),
+  ),
+);
+}
 
   Future<void> _mostrarPanelBluetooth(BuildContext context) async {
     await showModalBottomSheet<void>(
@@ -558,7 +602,7 @@ class _PinVerificacionCardState extends State<_PinVerificacionCard> {
                         _headerSubtitle,
                         style: const TextStyle(
                           fontSize: 11,
-                          color: Color(0xFF8A94A6),
+                          color: AppColors.textSecondary,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -572,7 +616,7 @@ class _PinVerificacionCardState extends State<_PinVerificacionCard> {
                     child: const Icon(
                       Icons.refresh_rounded,
                       size: 18,
-                      color: Color(0xFF8A94A6),
+                      color: AppColors.textMuted,
                     ),
                   ),
               ],
@@ -615,28 +659,28 @@ class _PinVerificacionCardState extends State<_PinVerificacionCard> {
               prefixIcon: const Icon(
                 Icons.lock_outline_rounded,
                 size: 20,
-                color: Color(0xFF8A94A6),
+                color: AppColors.textMuted,
               ),
               filled: true,
-              fillColor: const Color(0xFFF8F9FC),
+              fillColor: AppColors.surfaceSubtle,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Color(0xFFE8ECF2)),
+                borderSide: const BorderSide(color: AppColors.border),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Color(0xFFE8ECF2)),
+                borderSide: const BorderSide(color: AppColors.border),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: const BorderSide(
-                  color: Color(0xFF1A73E8),
+                  color: AppColors.primary,
                   width: 1.5,
                 ),
               ),
               errorBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Color(0xFFE53935)),
+                borderSide: const BorderSide(color: AppColors.error),
               ),
               errorText:
                   _estado == _PinEstado.invalido ? _mensajeError : null,
@@ -649,12 +693,12 @@ class _PinVerificacionCardState extends State<_PinVerificacionCard> {
             child: FilledButton.icon(
               onPressed: _estado == _PinEstado.cargando ? null : _comprobar,
               style: FilledButton.styleFrom(
-                backgroundColor: const Color(0xFF1A73E8),
-                disabledBackgroundColor:
-                    const Color(0xFF1A73E8).withOpacity(0.5),
+                backgroundColor: AppColors.primary,
+                disabledBackgroundColor: AppColors.primary.withOpacity(0.5),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
+                elevation: 0,
               ),
               icon: _estado == _PinEstado.cargando
                   ? const SizedBox(
@@ -673,6 +717,7 @@ class _PinVerificacionCardState extends State<_PinVerificacionCard> {
                 style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
+                  letterSpacing: -0.2,
                 ),
               ),
             ),
@@ -690,13 +735,13 @@ class _PinVerificacionCardState extends State<_PinVerificacionCard> {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: const BoxDecoration(
-              color: Color(0xFFE6F4EA),
+              color: AppColors.successSubtle,
               shape: BoxShape.circle,
             ),
             child: const Icon(
               Icons.verified_rounded,
               size: 36,
-              color: Color(0xFF1B873F),
+              color: AppColors.success,
             ),
           ),
           const SizedBox(height: 14),
@@ -705,7 +750,8 @@ class _PinVerificacionCardState extends State<_PinVerificacionCard> {
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w700,
-              color: Color(0xFF1B873F),
+              color: AppColors.success,
+              letterSpacing: -0.2,
             ),
           ),
           const SizedBox(height: 4),
@@ -713,9 +759,9 @@ class _PinVerificacionCardState extends State<_PinVerificacionCard> {
             'El PIN ingresado es correcto.\nPuedes proceder con la entrega.',
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: 12,
-              color: Color(0xFF8A94A6),
-              height: 1.5,
+              fontSize: 13,
+              color: AppColors.textSecondary,
+              height: 1.4,
             ),
           ),
         ],
@@ -725,33 +771,33 @@ class _PinVerificacionCardState extends State<_PinVerificacionCard> {
 
   Color get _borderColor {
     switch (_estado) {
-      case _PinEstado.valido:   return const Color(0xFF81C784);
-      case _PinEstado.invalido: return const Color(0xFFEF9A9A);
-      default:                  return const Color(0xFFE8ECF2);
+      case _PinEstado.valido:   return AppColors.success.withOpacity(0.4);
+      case _PinEstado.invalido: return AppColors.error.withOpacity(0.4);
+      default:                  return AppColors.border;
     }
   }
 
   Color get _headerBg {
     switch (_estado) {
-      case _PinEstado.valido:   return const Color(0xFFE6F4EA);
-      case _PinEstado.invalido: return const Color(0xFFFFEBEE);
-      default:                  return const Color(0xFFF8F9FC);
+      case _PinEstado.valido:   return AppColors.successSubtle;
+      case _PinEstado.invalido: return AppColors.errorSubtle;
+      default:                  return AppColors.surfaceSubtle;
     }
   }
 
   Color get _iconBg {
     switch (_estado) {
-      case _PinEstado.valido:   return const Color(0xFFC8E6C9);
-      case _PinEstado.invalido: return const Color(0xFFFFCDD2);
-      default:                  return const Color(0xFFE8F0FE);
+      case _PinEstado.valido:   return AppColors.success.withOpacity(0.12);
+      case _PinEstado.invalido: return AppColors.error.withOpacity(0.12);
+      default:                  return AppColors.primarySubtle;
     }
   }
 
   Color get _iconColor {
     switch (_estado) {
-      case _PinEstado.valido:   return const Color(0xFF1B873F);
-      case _PinEstado.invalido: return const Color(0xFFB71C1C);
-      default:                  return const Color(0xFF1A73E8);
+      case _PinEstado.valido:   return AppColors.success;
+      case _PinEstado.invalido: return AppColors.error;
+      default:                  return AppColors.primaryAccent;
     }
   }
 
@@ -816,20 +862,22 @@ class _LivePill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
-        color: const Color(0xFFEAF3DE),
+        color: AppColors.successSubtle,
         borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.success.withOpacity(0.3)),
       ),
       child: const Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.circle, size: 7, color: Color(0xFF1D9E75)),
-          SizedBox(width: 4),
+          Icon(Icons.circle, size: 6, color: AppColors.success),
+          SizedBox(width: 5),
           Text(
-            'En vivo',
+            'EN VIVO',
             style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFF3B6D11),
+              fontSize: 10,
+              fontWeight: FontWeight.w700,
+              color: AppColors.success,
+              letterSpacing: 0.4,
             ),
           ),
         ],
@@ -842,112 +890,165 @@ class _ViajeInfoCard extends StatelessWidget {
   const _ViajeInfoCard({required this.viaje});
   final Viaje viaje;
 
-  Color _estadoColor(String? estado) {
+  (Color, Color) _estadoTheme(String? estado) {
     switch (estado?.toLowerCase()) {
-      case 'transito':           return const Color(0xFF185FA5);
-      case 'entregado':          return const Color(0xFF1D9E75);
-      case 'muestra comprometida': return const Color(0xFFE24B4A);
-      default:                   return const Color(0xFF888780);
+      case 'transito':
+        return (AppColors.primaryAccent, AppColors.primarySubtle);
+      case 'entregado':
+        return (AppColors.success, AppColors.successSubtle);
+      case 'muestra comprometida':
+        return (AppColors.error, AppColors.errorSubtle);
+      default:
+        return (AppColors.textSecondary, AppColors.surfaceSubtle);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final v = viaje;
-    final estadoColor = _estadoColor(v.estadoViaje);
+    final (textColor, bgColor) = _estadoTheme(v.estadoViaje);
 
-    return Card(
+    return Container(
       margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    '# ${v.idViaje.length > 8 ? v.idViaje.substring(0, 8) : v.idViaje}',
-                    style: Theme.of(context).textTheme.bodySmall,
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.border),
+      ),
+      padding: const EdgeInsets.all(18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceSubtle,
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(color: AppColors.borderSubtle),
+                ),
+                child: Text(
+                  'ID: #${v.idCorto}',
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary,
+                    letterSpacing: 0.4,
                   ),
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: estadoColor.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    v.estadoViaje ?? 'Sin estado',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: estadoColor,
-                    ),
+              ),
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: bgColor,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: textColor.withOpacity(0.2)),
+                ),
+                child: Text(
+                  v.estadoViaje?.toUpperCase() ?? 'SIN ESTADO',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: textColor,
+                    letterSpacing: 0.3,
                   ),
                 ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                const Icon(Icons.trip_origin,
-                    size: 14, color: Color(0xFF1D9E75)),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: Text(
-                    v.idSedeOrigen,
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodyMedium
-                        ?.copyWith(fontWeight: FontWeight.w500),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Column(
+                children: [
+                  const Icon(
+                    Icons.trip_origin_rounded,
+                    size: 14,
+                    color: AppColors.primaryAccent,
                   ),
-                ),
-                const Icon(Icons.arrow_forward,
-                    size: 14, color: Color(0xFF888780)),
-                const SizedBox(width: 6),
-                const Icon(Icons.place_outlined,
-                    size: 14, color: Color(0xFFE24B4A)),
-                const SizedBox(width: 4),
-                Expanded(
-                  child: Text(
-                    v.idSedeDestino,
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodyMedium
-                        ?.copyWith(fontWeight: FontWeight.w500),
+                  Container(
+                    width: 1.5,
+                    height: 20,
+                    color: AppColors.border,
+                    margin: const EdgeInsets.symmetric(vertical: 2),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            const Divider(height: 1),
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                const Icon(Icons.schedule_outlined,
-                    size: 14, color: Color(0xFF888780)),
-                const SizedBox(width: 4),
-                Expanded(
-                  child: Text(
-                    'Inicio: ${v.fechaInicio}',
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ),
-                if (v.fechaLlegada != null) ...[
-                  const Icon(Icons.flag_outlined,
-                      size: 14, color: Color(0xFF1D9E75)),
-                  const SizedBox(width: 4),
-                  Text(
-                    'Llegada: ${v.fechaLlegada}',
-                    style: Theme.of(context).textTheme.bodySmall,
+                  const Icon(
+                    Icons.location_on_rounded,
+                    size: 15,
+                    color: AppColors.error,
                   ),
                 ],
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      v.idSedeOrigen,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      v.idSedeDestino,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          const Divider(),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              const Icon(
+                Icons.schedule_rounded,
+                size: 14,
+                color: AppColors.textMuted,
+              ),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  'Inicio: ${v.fechaInicio}',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ),
+              if (v.fechaLlegada != null) ...[
+                const Icon(
+                  Icons.flag_outlined,
+                  size: 14,
+                  color: AppColors.success,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  'Llegada: ${v.fechaLlegada}',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
               ],
-            ),
-          ],
-        ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -973,28 +1074,27 @@ class _SensorCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Theme.of(context)
-            .colorScheme
-            .surfaceContainerHighest
-            .withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(12),
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(icon,
-                  size: 14,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant),
-              const SizedBox(width: 4),
+              Icon(icon, size: 14, color: AppColors.textSecondary),
+              const SizedBox(width: 6),
               Expanded(
                 child: Text(
                   label,
                   style: const TextStyle(
-                      fontSize: 11, color: Color(0xFF888780)),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textSecondary,
+                  ),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -1007,26 +1107,31 @@ class _SensorCard extends StatelessWidget {
             children: [
               Text(
                 value,
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w500,
-                  color: color,
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimary,
+                  letterSpacing: -0.5,
                 ),
               ),
-              const SizedBox(width: 3),
+              const SizedBox(width: 4),
               Text(
                 unit,
-                style: const TextStyle(fontSize: 12, color: Color(0xFF888780)),
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: AppColors.textSecondary,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ],
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 8),
           ClipRRect(
-            borderRadius: BorderRadius.circular(2),
+            borderRadius: BorderRadius.circular(3),
             child: LinearProgressIndicator(
               value: fill,
-              minHeight: 3,
-              backgroundColor: color.withValues(alpha: 0.15),
+              minHeight: 4,
+              backgroundColor: AppColors.surfaceSubtle,
               valueColor: AlwaysStoppedAnimation<Color>(color),
             ),
           ),
@@ -1044,34 +1149,29 @@ class _GpsCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Theme.of(context)
-            .colorScheme
-            .surfaceContainerHighest
-            .withValues(alpha: 0.4),
-        borderRadius: BorderRadius.circular(12),
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.border),
       ),
       child: Column(
         children: [
           Container(
-            height: 70,
+            height: 64,
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                color: Theme.of(context).colorScheme.outlineVariant,
-                width: 0.5,
-              ),
+              color: AppColors.surfaceSubtle,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AppColors.border),
             ),
             alignment: Alignment.center,
             child: const Icon(
-              Icons.location_on,
-              color: Color(0xFFE24B4A),
-              size: 28,
+              Icons.location_on_rounded,
+              color: AppColors.danger,
+              size: 26,
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
@@ -1102,12 +1202,18 @@ class _GpsDato extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Text(label,
-            style: const TextStyle(fontSize: 11, color: Color(0xFF888780))),
-        const SizedBox(height: 2),
+        Text(
+          label,
+          style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+        ),
+        const SizedBox(height: 3),
         Text(
           value,
-          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+          style: const TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: AppColors.textPrimary,
+          ),
         ),
       ],
     );
@@ -1136,126 +1242,137 @@ class _BluetoothCard extends StatelessWidget {
     final connected = bt.isConnected;
     final p = bt.lastPacket;
 
-    return Card(
+    return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              children: [
-                Container(
-                  width: 8,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: connected
-                        ? const Color(0xFF1D9E75)
-                        : const Color(0xFF888780),
-                  ),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 9,
+                height: 9,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: connected ? AppColors.success : AppColors.textMuted,
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        connected ? 'ESP32 conectado' : 'ESP32 desconectado',
-                        style: const TextStyle(
-                            fontSize: 14, fontWeight: FontWeight.w500),
-                      ),
-                      Text(
-                        bt.statusMessage ?? 'Sin conectar',
-                        style: const TextStyle(
-                            fontSize: 12, color: Color(0xFF888780)),
-                      ),
-                    ],
-                  ),
-                ),
-                if (connected && p != null)
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 8, vertical: 3),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFEAF3DE),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: const Text(
-                      'En vivo',
-                      style: TextStyle(
-                        fontSize: 11,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      connected ? 'ESP32 conectado' : 'ESP32 desconectado',
+                      style: const TextStyle(
+                        fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: Color(0xFF3B6D11),
+                        color: AppColors.textPrimary,
                       ),
                     ),
-                  ),
-              ],
-            ),
-            if (bt.lastError != null) ...[
-              const SizedBox(height: 4),
-              Text(
-                bt.lastError!,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Theme.of(context).colorScheme.error,
+                    Text(
+                      bt.statusMessage ?? 'Sin conectar',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
                 ),
               ),
+              if (connected && p != null)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: AppColors.successBg,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: AppColors.success.withValues(alpha: 0.25)),
+                  ),
+                  child: const Text(
+                    'En vivo',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.success,
+                    ),
+                  ),
+                ),
             ],
-            if (!bt.isSupported)
-              const Padding(
-                padding: EdgeInsets.only(top: 8),
-                child: Text(
-                  'Empareja "ESP32_Telemetria_Bryan" en Ajustes → Bluetooth antes de conectar.',
-                  style: TextStyle(fontSize: 12, color: Color(0xFF888780)),
-                ),
+          ),
+          if (bt.lastError != null) ...[
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppColors.dangerBg,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: AppColors.danger.withValues(alpha: 0.2)),
               ),
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                FilledButton.icon(
-                  onPressed:
-                      conectando || !bt.isSupported ? null : onToggle,
-                  icon: conectando
-                      ? const SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : Icon(
-                          connected
-                              ? Icons.bluetooth_disabled_outlined
-                              : Icons.bluetooth_outlined,
-                          size: 18,
-                        ),
-                  label: Text(connected ? 'Desconectar' : 'Conectar ESP32'),
-                ),
-                if (connected)
-                  OutlinedButton.icon(
-                    onPressed: p == null ? null : onGuardar,
-                    icon: const Icon(Icons.save_alt_outlined, size: 18),
-                    label: const Text('Guardar lectura'),
-                  ),
-              ],
-            ),
-            SwitchListTile(
-              contentPadding: EdgeInsets.zero,
-              dense: true,
-              title: const Text(
-                'Agregar cada lectura a la tabla',
-                style: TextStyle(fontSize: 13),
+              child: Text(
+                bt.lastError!,
+                style: const TextStyle(fontSize: 12, color: AppColors.danger),
               ),
-              subtitle: const Text(
-                'El ESP32 envía datos cada ~3 s',
-                style: TextStyle(fontSize: 12),
-              ),
-              value: autoGuardar,
-              onChanged: onAutoGuardar,
             ),
           ],
-        ),
+          if (!bt.isSupported)
+            const Padding(
+              padding: EdgeInsets.only(top: 8),
+              child: Text(
+                'Empareja "ESP32_Telemetria_Bryan" en Ajustes → Bluetooth antes de conectar.',
+                style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+              ),
+            ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              FilledButton.icon(
+                onPressed: conectando || !bt.isSupported ? null : onToggle,
+                icon: conectando
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                      )
+                    : Icon(
+                        connected
+                            ? Icons.bluetooth_disabled_outlined
+                            : Icons.bluetooth_outlined,
+                        size: 18,
+                      ),
+                label: Text(connected ? 'Desconectar' : 'Conectar ESP32'),
+              ),
+              if (connected)
+                OutlinedButton.icon(
+                  onPressed: p == null ? null : onGuardar,
+                  icon: const Icon(Icons.save_alt_outlined, size: 18),
+                  label: const Text('Guardar lectura'),
+                ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            dense: true,
+            title: const Text(
+              'Agregar cada lectura a la tabla',
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textPrimary),
+            ),
+            subtitle: const Text(
+              'El ESP32 envía datos cada ~3 s',
+              style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+            ),
+            value: autoGuardar,
+            onChanged: onAutoGuardar,
+          ),
+        ],
       ),
     );
   }
@@ -1274,7 +1391,7 @@ class _TelemetriaTable extends StatelessWidget {
           child: Text(
             'Sin registros. Conecta el ESP32 o usa entrada manual.',
             textAlign: TextAlign.center,
-            style: TextStyle(color: Color(0xFF888780)),
+            style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
           ),
         ),
       );
@@ -1287,46 +1404,53 @@ class _TelemetriaTable extends StatelessWidget {
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: DataTable(
-          headingRowHeight: 36,
-          dataRowMinHeight: 38,
+          headingRowHeight: 38,
+          dataRowMinHeight: 40,
           dataRowMaxHeight: 44,
           columnSpacing: 16,
+          headingTextStyle: const TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: AppColors.textSecondary,
+          ),
           columns: const [
-            DataColumn(label: Text('Hora', style: TextStyle(fontSize: 12))),
-            DataColumn(label: Text('Orig.', style: TextStyle(fontSize: 12))),
-            DataColumn(label: Text('Temp °C', style: TextStyle(fontSize: 12))),
-            DataColumn(label: Text('G', style: TextStyle(fontSize: 12))),
-            DataColumn(label: Text('Alerta', style: TextStyle(fontSize: 12))),
-            DataColumn(label: Text('WS', style: TextStyle(fontSize: 12))),
+            DataColumn(label: Text('Hora')),
+            DataColumn(label: Text('Orig.')),
+            DataColumn(label: Text('Temp °C')),
+            DataColumn(label: Text('G')),
+            DataColumn(label: Text('Alerta')),
+            DataColumn(label: Text('WS')),
           ],
           rows: items.map((r) {
             final gColor = r.fuerzaG >= 8
-                ? const Color(0xFFE24B4A)
+                ? AppColors.danger
                 : r.fuerzaG >= 4
-                    ? const Color(0xFFEF9F27)
+                    ? AppColors.warning
                     : null;
 
             return DataRow(cells: [
               DataCell(Text(_hora(r.registradoEn),
-                  style: const TextStyle(fontSize: 12))),
+                  style: const TextStyle(fontSize: 12, color: AppColors.textPrimary))),
               DataCell(Icon(
                 r.desdeBluetooth
                     ? Icons.bluetooth
                     : Icons.keyboard_outlined,
                 size: 16,
                 color: r.desdeBluetooth
-                    ? const Color(0xFF185FA5)
-                    : const Color(0xFF888780),
+                    ? AppColors.primary
+                    : AppColors.textMuted,
               )),
-              DataCell(Text(r.temperaturaInterna.toStringAsFixed(1),
-                  style: const TextStyle(fontSize: 12))),
+              DataCell(Text(
+                r.temperaturaInterna.toStringAsFixed(1),
+                style: const TextStyle(fontSize: 12, color: AppColors.textPrimary),
+              )),
               DataCell(Text(
                 r.fuerzaG.toStringAsFixed(2),
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight:
                       gColor != null ? FontWeight.w600 : FontWeight.normal,
-                  color: gColor,
+                  color: gColor ?? AppColors.textPrimary,
                 ),
               )),
               DataCell(_AlertaChip(alerta: r.alertaGenerada)),
@@ -1336,8 +1460,8 @@ class _TelemetriaTable extends StatelessWidget {
                     : Icons.cloud_off_outlined,
                 size: 16,
                 color: r.enviadoAlServidor
-                    ? const Color(0xFF1D9E75)
-                    : const Color(0xFFEF9F27),
+                    ? AppColors.success
+                    : AppColors.warning,
               )),
             ]);
           }).toList(),
@@ -1362,20 +1486,21 @@ class _AlertaChip extends StatelessWidget {
   Widget build(BuildContext context) {
     if (alerta == null || alerta!.isEmpty) {
       return const Text('—',
-          style: TextStyle(fontSize: 12, color: Color(0xFF888780)));
+          style: TextStyle(fontSize: 12, color: AppColors.textMuted));
     }
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
-        color: const Color(0xFFFAEEDA),
+        color: AppColors.warningBg,
         borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.warning.withValues(alpha: 0.3)),
       ),
       child: Text(
         alerta!.length > 10 ? '${alerta!.substring(0, 10)}…' : alerta!,
         style: const TextStyle(
           fontSize: 11,
-          fontWeight: FontWeight.w500,
-          color: Color(0xFF854F0B),
+          fontWeight: FontWeight.w600,
+          color: AppColors.warning,
         ),
       ),
     );
@@ -1388,22 +1513,31 @@ class _BottomBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-        child: Row(
-          children: [
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: onBluetooth,
-                icon: const Icon(Icons.bluetooth_outlined, size: 18),
-                label: const Text('Telemetría BT'),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 13),
+    return Container(
+      decoration: const BoxDecoration(
+        color: AppColors.surface,
+        border: Border(top: BorderSide(color: AppColors.border)),
+      ),
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+          child: Row(
+            children: [
+              Expanded(
+                child: FilledButton.tonalIcon(
+                  onPressed: onBluetooth,
+                  icon: const Icon(Icons.bluetooth_outlined, size: 18),
+                  label: const Text('Telemetría BT'),
+                  style: FilledButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

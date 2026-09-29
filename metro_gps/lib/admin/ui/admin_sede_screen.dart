@@ -190,7 +190,6 @@ class _AdminSedeScreenState extends State<AdminSedeScreen> {
       backgroundColor: AdminColors.surface,
       appBar: AppBar(
         title: const Text('Sedes'),
-        backgroundColor: AdminColors.navy,
         actions: [
           IconButton(
             onPressed: cargando ? null : _cargarSedes,
@@ -205,7 +204,6 @@ class _AdminSedeScreenState extends State<AdminSedeScreen> {
             : () => _mostrarFormulario(),
         icon: const Icon(Icons.add),
         label: const Text('Nueva sede'),
-        backgroundColor: AdminColors.navy,
       ),
       body: _cargandoClinicas
           ? const Center(child: CircularProgressIndicator())

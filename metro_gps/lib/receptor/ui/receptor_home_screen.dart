@@ -1,9 +1,12 @@
+// lib/receptor/ui/receptor_home_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:metro_gps/receptor/models/viaje.dart';
 
 import '../../auth/logout_action.dart';
 import '../../core/telemetria_ws_paths.dart';
+import '../../core/theme/app_colors.dart';
 import '../../shared/ui/viaje_telemetria_screen.dart';
 import '../receptor_viaje_api.dart';
 
@@ -28,7 +31,7 @@ class _ReceptorHomeScreenState extends State<ReceptorHomeScreen>
     super.initState();
     _fadeController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 400),
+      duration: const Duration(milliseconds: 350),
     );
     _fadeAnimation = CurvedAnimation(
       parent: _fadeController,
@@ -55,7 +58,6 @@ class _ReceptorHomeScreenState extends State<ReceptorHomeScreen>
       _cargando = false;
       if (res.isSuccess && res.data != null) {
         _viajes = res.data!;
-        _error = _viajes.isEmpty ? null : null;
       } else {
         _error = res.errorMessage;
       }
@@ -65,104 +67,72 @@ class _ReceptorHomeScreenState extends State<ReceptorHomeScreen>
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F6FA),
-      appBar: _buildAppBar(colorScheme),
-      body: _buildBody(),
-    );
-  }
-
-  PreferredSizeWidget _buildAppBar(ColorScheme colorScheme) {
-    return AppBar(
-      backgroundColor: Colors.white,
-      elevation: 0,
-      surfaceTintColor: Colors.transparent,
-      titleSpacing: 20,
-      title: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: const Color(0xFF1A73E8).withOpacity(0.1),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: const Icon(
-              Icons.medical_services_outlined,
-              color: Color(0xFF1A73E8),
-              size: 20,
-            ),
-          ),
-          const SizedBox(width: 12),
-          const Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Mis Viajes',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFF1A1F36),
-                  letterSpacing: -0.3,
-                ),
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        backgroundColor: AppColors.surface,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        titleSpacing: 20,
+        title: Row(
+          children: [
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: AppColors.surfaceSubtle,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: AppColors.border),
               ),
-              Text(
-                'Receptor',
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w500,
-                  color: Color(0xFF8A94A6),
-                  letterSpacing: 0.2,
-                ),
+              child: const Icon(
+                Icons.medical_services_outlined,
+                color: AppColors.textPrimary,
+                size: 20,
               ),
-            ],
+            ),
+            const SizedBox(width: 12),
+            const Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Recepción de Envíos',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary,
+                    letterSpacing: -0.3,
+                  ),
+                ),
+                Text(
+                  'Receptor de Clínica / Sede',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w400,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+        actions: [
+          IconButton(
+            tooltip: 'Actualizar',
+            onPressed: _cargando ? null : _cargar,
+            icon: const Icon(Icons.refresh_rounded, size: 20),
           ),
+          const LogoutAppBarButton(),
+          const SizedBox(width: 8),
         ],
-      ),
-      actions: [
-        _buildRefreshButton(),
-        const SizedBox(width: 4),
-        const LogoutAppBarButton(),
-        const SizedBox(width: 8),
-      ],
-      bottom: PreferredSize(
-        preferredSize: const Size.fromHeight(1),
-        child: Container(
-          height: 1,
-          color: const Color(0xFFE8ECF2),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(color: AppColors.border, height: 1),
         ),
       ),
-    );
-  }
-
-  Widget _buildRefreshButton() {
-    return Tooltip(
-      message: 'Actualizar viajes',
-      child: InkWell(
-        borderRadius: BorderRadius.circular(10),
-        onTap: _cargar,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          decoration: BoxDecoration(
-            border: Border.all(color: const Color(0xFFE8ECF2)),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: const Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.refresh_rounded, size: 16, color: Color(0xFF1A73E8)),
-              SizedBox(width: 4),
-              Text(
-                'Actualizar',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF1A73E8),
-                ),
-              ),
-            ],
-          ),
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 800),
+          child: _buildBody(),
         ),
       ),
     );
@@ -177,10 +147,11 @@ class _ReceptorHomeScreenState extends State<ReceptorHomeScreen>
       opacity: _fadeAnimation,
       child: RefreshIndicator(
         onRefresh: _cargar,
-        color: const Color(0xFF1A73E8),
-        child: ListView.builder(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+        color: AppColors.primary,
+        child: ListView.separated(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
           itemCount: _viajes.length,
+          separatorBuilder: (_, __) => const SizedBox(height: 12),
           itemBuilder: (context, i) => _ViajeCard(
             viaje: _viajes[i],
             onTap: () => _abrirTelemetria(_viajes[i]),
@@ -191,28 +162,10 @@ class _ReceptorHomeScreenState extends State<ReceptorHomeScreen>
   }
 
   Widget _buildLoading() {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const SizedBox(
-            width: 36,
-            height: 36,
-            child: CircularProgressIndicator(
-              strokeWidth: 2.5,
-              color: Color(0xFF1A73E8),
-            ),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Cargando viajes…',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey.shade500,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
+    return const Center(
+      child: CircularProgressIndicator(
+        strokeWidth: 2.5,
+        color: AppColors.primary,
       ),
     );
   }
@@ -225,40 +178,34 @@ class _ReceptorHomeScreenState extends State<ReceptorHomeScreen>
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              padding: const EdgeInsets.all(20),
+              width: 56,
+              height: 56,
               decoration: BoxDecoration(
-                color: const Color(0xFFFFEBEE),
+                color: AppColors.errorSubtle,
                 borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: AppColors.error.withOpacity(0.2)),
               ),
               child: const Icon(
                 Icons.wifi_off_rounded,
-                size: 40,
-                color: Color(0xFFE53935),
+                size: 28,
+                color: AppColors.error,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              _error ?? 'Error de conexión',
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 14,
+                color: AppColors.textSecondary,
+                height: 1.4,
               ),
             ),
             const SizedBox(height: 20),
-            Text(
-              _error!,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 15,
-                color: Color(0xFF1A1F36),
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            const SizedBox(height: 24),
             FilledButton.icon(
               onPressed: _cargar,
-              icon: const Icon(Icons.refresh_rounded, size: 16),
+              icon: const Icon(Icons.refresh_rounded, size: 18),
               label: const Text('Reintentar'),
-              style: FilledButton.styleFrom(
-                backgroundColor: const Color(0xFF1A73E8),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
             ),
           ],
         ),
@@ -274,49 +221,35 @@ class _ReceptorHomeScreenState extends State<ReceptorHomeScreen>
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              padding: const EdgeInsets.all(24),
+              width: 56,
+              height: 56,
               decoration: BoxDecoration(
-                color: const Color(0xFFF0F4FF),
-                borderRadius: BorderRadius.circular(20),
+                color: AppColors.surfaceSubtle,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: AppColors.border),
               ),
               child: const Icon(
-                Icons.local_shipping_outlined,
-                size: 48,
-                color: Color(0xFF1A73E8),
+                Icons.inventory_2_outlined,
+                size: 28,
+                color: AppColors.textMuted,
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
             const Text(
-              'Sin viajes asignados',
+              'Sin viajes asignados para recepción',
               style: TextStyle(
-                fontSize: 17,
-                fontWeight: FontWeight.w700,
-                color: Color(0xFF1A1F36),
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary,
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 6),
             const Text(
-              'Cuando tengas viajes asignados\naparecerán aquí.',
+              'Los traslados destinados a tu clínica o sede aparecerán aquí con su código PIN.',
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 14,
-                color: Color(0xFF8A94A6),
-                height: 1.5,
-              ),
-            ),
-            const SizedBox(height: 24),
-            OutlinedButton.icon(
-              onPressed: _cargar,
-              icon: const Icon(Icons.refresh_rounded, size: 16),
-              label: const Text('Verificar'),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: const Color(0xFF1A73E8),
-                side: const BorderSide(color: Color(0xFF1A73E8)),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
+                fontSize: 13,
+                color: AppColors.textSecondary,
               ),
             ),
           ],
@@ -325,18 +258,17 @@ class _ReceptorHomeScreenState extends State<ReceptorHomeScreen>
     );
   }
 
-// ✅ correcto
-void _abrirTelemetria(Viaje v) {
-  Navigator.of(context).push(
-    MaterialPageRoute<void>(
-      builder: (_) => ViajeTelemetriaScreen(
-        viaje: v.toConductorViaje(),
-        rolWs: TelemetriaWsRol.receptor,
-        pinEntrega: v.pinEntrega, // ← esta línea faltaba
+  void _abrirTelemetria(Viaje v) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => ViajeTelemetriaScreen(
+          viaje: v.toConductorViaje(),
+          rolWs: TelemetriaWsRol.receptor,
+          pinEntrega: v.pinEntrega,
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 }
 
 // ─── Tarjeta de viaje ────────────────────────────────────────────────────────
@@ -349,32 +281,31 @@ class _ViajeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Material(
-        color: Colors.white,
+    return Material(
+      color: AppColors.surface,
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        onTap: onTap,
         borderRadius: BorderRadius.circular(16),
-        clipBehavior: Clip.hardEdge,
-        child: InkWell(
-          onTap: onTap,
-          child: Container(
-            decoration: BoxDecoration(
-              border: Border.all(color: const Color(0xFFE8ECF2)),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildHeader(),
-                const SizedBox(height: 14),
-                _buildDivider(),
-                const SizedBox(height: 14),
-                _buildDetails(),
-                if (viaje.pinEntrega != null && viaje.pinEntrega!.isNotEmpty)
-                  _buildPinChip(context),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.border),
+          ),
+          padding: const EdgeInsets.all(18),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildHeader(),
+              const SizedBox(height: 14),
+              const Divider(),
+              const SizedBox(height: 14),
+              _buildDetails(),
+              if (viaje.pinEntrega != null && viaje.pinEntrega!.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                _PinEntregaWidget(pin: viaje.pinEntrega!),
               ],
-            ),
+            ],
           ),
         ),
       ),
@@ -385,15 +316,16 @@ class _ViajeCard extends StatelessWidget {
     return Row(
       children: [
         Container(
-          padding: const EdgeInsets.all(10),
+          width: 40,
+          height: 40,
           decoration: BoxDecoration(
-            color: const Color(0xFFF0F4FF),
-            borderRadius: BorderRadius.circular(12),
+            color: AppColors.primarySubtle,
+            borderRadius: BorderRadius.circular(10),
           ),
           child: const Icon(
             Icons.local_shipping_outlined,
-            color: Color(0xFF1A73E8),
-            size: 22,
+            color: AppColors.primaryAccent,
+            size: 20,
           ),
         ),
         const SizedBox(width: 12),
@@ -402,48 +334,63 @@ class _ViajeCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Viaje ${viaje.idCorto}',
+                'VIAJE #${viaje.idCorto}',
                 style: const TextStyle(
-                  fontSize: 15,
+                  fontSize: 13,
                   fontWeight: FontWeight.w700,
-                  color: Color(0xFF1A1F36),
-                  letterSpacing: -0.2,
+                  color: AppColors.textPrimary,
+                  letterSpacing: 0.3,
                 ),
               ),
-              const SizedBox(height: 2),
+              const SizedBox(height: 3),
               _EstadoBadge(estado: viaje.estadoViaje),
             ],
           ),
         ),
         const Icon(
-          Icons.monitor_heart_outlined,
-          color: Color(0xFF1A73E8),
-          size: 22,
+          Icons.arrow_forward_ios_rounded,
+          color: AppColors.textMuted,
+          size: 14,
         ),
       ],
     );
-  }
-
-  Widget _buildDivider() {
-    return Container(height: 1, color: const Color(0xFFF0F2F7));
   }
 
   Widget _buildDetails() {
     return Row(
       children: [
-        _InfoChip(
-          icon: Icons.person_outline_rounded,
-          label: 'Conductor',
-          value: _idCorto(viaje.idUsuarioConductor),
+        const Icon(
+          Icons.person_outline_rounded,
+          size: 15,
+          color: AppColors.textSecondary,
+        ),
+        const SizedBox(width: 6),
+        const Text(
+          'Conductor: ',
+          style: TextStyle(
+            fontSize: 12,
+            color: AppColors.textSecondary,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        Text(
+          _idCorto(viaje.idUsuarioConductor),
+          style: const TextStyle(
+            fontSize: 12,
+            color: AppColors.textPrimary,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const Spacer(),
+        const Text(
+          'Monitorear telemetría',
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: AppColors.primaryAccent,
+          ),
         ),
       ],
-    );
-  }
-
-  Widget _buildPinChip(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 14),
-      child: _PinEntregaWidget(pin: viaje.pinEntrega!),
     );
   }
 
@@ -465,6 +412,7 @@ class _EstadoBadge extends StatelessWidget {
       decoration: BoxDecoration(
         color: bg,
         borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withOpacity(0.2)),
       ),
       child: Text(
         label,
@@ -472,7 +420,7 @@ class _EstadoBadge extends StatelessWidget {
           fontSize: 11,
           fontWeight: FontWeight.w600,
           color: color,
-          letterSpacing: 0.1,
+          letterSpacing: 0.2,
         ),
       ),
     );
@@ -482,78 +430,40 @@ class _EstadoBadge extends StatelessWidget {
     switch (estado?.toLowerCase()) {
       case 'en_curso':
       case 'en curso':
+      case 'transito':
         return (
-          const Color(0xFF1B873F),
-          const Color(0xFFE6F4EA),
-          'En curso'
+          AppColors.primaryAccent,
+          AppColors.primarySubtle,
+          'En tránsito'
         );
       case 'pendiente':
         return (
-          const Color(0xFFB45309),
-          const Color(0xFFFFF8E1),
+          AppColors.warning,
+          AppColors.warningSubtle,
           'Pendiente'
         );
       case 'finalizado':
+      case 'entregado':
       case 'completado':
         return (
-          const Color(0xFF5B6273),
-          const Color(0xFFF0F2F7),
-          'Finalizado'
+          AppColors.success,
+          AppColors.successSubtle,
+          'Entregado'
         );
       case 'cancelado':
+      case 'muestra comprometida':
         return (
-          const Color(0xFFB71C1C),
-          const Color(0xFFFFEBEE),
-          'Cancelado'
+          AppColors.error,
+          AppColors.errorSubtle,
+          'Alerta crítica'
         );
       default:
         return (
-          const Color(0xFF5B6273),
-          const Color(0xFFF0F2F7),
+          AppColors.textSecondary,
+          AppColors.surfaceSubtle,
           estado ?? '—'
         );
     }
-  }
-}
-
-// ─── Chip de info ─────────────────────────────────────────────────────────────
-
-class _InfoChip extends StatelessWidget {
-  const _InfoChip({
-    required this.icon,
-    required this.label,
-    required this.value,
-  });
-
-  final IconData icon;
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, size: 14, color: const Color(0xFF8A94A6)),
-        const SizedBox(width: 4),
-        Text(
-          '$label: ',
-          style: const TextStyle(
-            fontSize: 12,
-            color: Color(0xFF8A94A6),
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 12,
-            color: Color(0xFF1A1F36),
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ],
-    );
   }
 }
 
@@ -586,9 +496,9 @@ class _PinEntregaWidgetState extends State<_PinEntregaWidget> {
         ),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        backgroundColor: const Color(0xFF1B873F),
+        backgroundColor: AppColors.primary,
         duration: const Duration(seconds: 2),
-        margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        margin: const EdgeInsets.all(16),
       ),
     );
   }
@@ -596,22 +506,22 @@ class _PinEntregaWidgetState extends State<_PinEntregaWidget> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFF8E1),
+        color: AppColors.surfaceSubtle,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFFFE082)),
+        border: Border.all(color: AppColors.border),
       ),
       child: Row(
         children: [
-          const Icon(Icons.key_rounded, size: 16, color: Color(0xFFB45309)),
+          const Icon(Icons.key_rounded, size: 16, color: AppColors.primaryAccent),
           const SizedBox(width: 8),
           const Text(
-            'PIN de entrega',
+            'PIN de entrega:',
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: Color(0xFFB45309),
+              color: AppColors.textSecondary,
             ),
           ),
           const SizedBox(width: 10),
@@ -621,33 +531,35 @@ class _PinEntregaWidgetState extends State<_PinEntregaWidget> {
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
-                color: _visible
-                    ? const Color(0xFF1A1F36)
-                    : const Color(0xFFB45309),
+                color: AppColors.textPrimary,
                 letterSpacing: _visible ? 2 : 4,
                 fontFamily: 'monospace',
               ),
             ),
           ),
-          // Mostrar / ocultar
-          GestureDetector(
-            onTap: () => setState(() => _visible = !_visible),
-            child: Icon(
+          IconButton(
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+            tooltip: _visible ? 'Ocultar PIN' : 'Mostrar PIN',
+            onPressed: () => setState(() => _visible = !_visible),
+            icon: Icon(
               _visible
                   ? Icons.visibility_off_outlined
                   : Icons.visibility_outlined,
               size: 18,
-              color: const Color(0xFFB45309),
+              color: AppColors.textSecondary,
             ),
           ),
-          const SizedBox(width: 10),
-          // Copiar
-          GestureDetector(
-            onTap: _copiarPin,
-            child: const Icon(
+          const SizedBox(width: 12),
+          IconButton(
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+            tooltip: 'Copiar PIN',
+            onPressed: _copiarPin,
+            icon: const Icon(
               Icons.copy_rounded,
               size: 16,
-              color: Color(0xFFB45309),
+              color: AppColors.textSecondary,
             ),
           ),
         ],

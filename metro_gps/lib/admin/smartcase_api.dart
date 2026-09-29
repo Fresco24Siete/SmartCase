@@ -45,7 +45,20 @@ class SmartCaseApi {
     try {
       final response = await _client.get('$_base/lista');
       if (response.statusCode >= 200 && response.statusCode < 300) {
-        final decoded = jsonDecode(response.body);
+        final body = response.body.trim();
+        if (body.isEmpty || body == 'null') {
+          return SmartCaseApiResult(
+            statusCode: response.statusCode,
+            data: const [],
+          );
+        }
+        final decoded = jsonDecode(body);
+        if (decoded == null) {
+          return SmartCaseApiResult(
+            statusCode: response.statusCode,
+            data: const [],
+          );
+        }
         if (decoded is List) {
           final lista = <SmartCase>[];
           for (final item in decoded) {

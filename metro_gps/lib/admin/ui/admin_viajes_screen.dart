@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../conductor/models/viaje.dart';
 import '../../core/telemetria_ws_paths.dart';
+import '../../core/theme/app_colors.dart';
 import '../../shared/ui/viaje_telemetria_screen.dart';
 import '../viaje_api.dart';
 import 'admin_theme.dart';
@@ -47,10 +48,9 @@ class _AdminViajesScreenState extends State<AdminViajesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AdminColors.surface,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text('Telemetría en vivo'),
-        backgroundColor: AdminColors.navy,
         actions: [
           IconButton(
             onPressed: _cargando ? null : _cargar,
@@ -59,91 +59,103 @@ class _AdminViajesScreenState extends State<AdminViajesScreen> {
           ),
         ],
       ),
-      body: _cargando
-          ? const Center(child: CircularProgressIndicator())
-          : _error != null
-              ? AdminErrorState(
-                  message: _error!, onRetry: _cargar)
-              : _viajes.isEmpty
-                  ? const AdminEmptyState(
-                      message: 'No hay viajes en tránsito',
-                      icon: Icons.route_outlined,
-                    )
-                  : Column(
-                      children: [
-                        // Cabecera de estado
-                        Container(
-                          width: double.infinity,
-                          margin: const EdgeInsets.fromLTRB(
-                              16, 16, 16, 0),
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 14),
-                          decoration: BoxDecoration(
-                            color: AdminColors.navy,
-                            borderRadius:
-                                BorderRadius.circular(14),
-                          ),
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 10,
-                                height: 10,
-                                decoration: const BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: Color(0xFF00FF88),
-                                ),
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 860),
+          child: _cargando
+              ? const Center(child: CircularProgressIndicator())
+              : _error != null
+                  ? AdminErrorState(
+                      message: _error!, onRetry: _cargar)
+                  : _viajes.isEmpty
+                      ? const AdminEmptyState(
+                          message: 'No hay viajes en tránsito',
+                          icon: Icons.route_outlined,
+                        )
+                      : Column(
+                          children: [
+                            // Cabecera de estado
+                            Container(
+                              width: double.infinity,
+                              margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 12),
+                              decoration: BoxDecoration(
+                                color: AppColors.surface,
+                                borderRadius: BorderRadius.circular(14),
+                                border: Border.all(color: AppColors.border),
                               ),
-                              const SizedBox(width: 10),
-                              Text(
-                                '${_viajes.length} viaje${_viajes.length == 1 ? '' : 's'} activo${_viajes.length == 1 ? '' : 's'}',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 14,
-                                ),
-                              ),
-                              const Spacer(),
-                              Text(
-                                'en tránsito',
-                                style: TextStyle(
-                                  color: Colors.white
-                                      .withOpacity(0.5),
-                                  fontSize: 13,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Expanded(
-                          child: RefreshIndicator(
-                            onRefresh: _cargar,
-                            child: ListView.builder(
-                              padding:
-                                  const EdgeInsets.fromLTRB(
-                                      16, 12, 16, 32),
-                              itemCount: _viajes.length,
-                              itemBuilder: (context, i) {
-                                final v = _viajes[i];
-                                return _ViajeCard(
-                                  viaje: v,
-                                  onTap: () =>
-                                      Navigator.of(context).push(
-                                    MaterialPageRoute<void>(
-                                      builder: (_) =>
-                                          ViajeTelemetriaScreen(
-                                        viaje: v,
-                                        rolWs:
-                                            TelemetriaWsRol.admin,
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: 8,
+                                    height: 8,
+                                    decoration: const BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: AppColors.success,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Text(
+                                    '${_viajes.length} viaje${_viajes.length == 1 ? '' : 's'} activo${_viajes.length == 1 ? '' : 's'}',
+                                    style: const TextStyle(
+                                      color: AppColors.textPrimary,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                  const Spacer(),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 8, vertical: 3),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.primaryLight,
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: const Text(
+                                      'En tránsito',
+                                      style: TextStyle(
+                                        color: AppColors.primary,
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w600,
                                       ),
                                     ),
                                   ),
-                                );
-                              },
+                                ],
+                              ),
                             ),
-                          ),
+                            Expanded(
+                              child: RefreshIndicator(
+                                onRefresh: _cargar,
+                                child: ListView.builder(
+                                  padding:
+                                      const EdgeInsets.fromLTRB(
+                                          16, 12, 16, 32),
+                                  itemCount: _viajes.length,
+                                  itemBuilder: (context, i) {
+                                    final v = _viajes[i];
+                                    return _ViajeCard(
+                                      viaje: v,
+                                      onTap: () =>
+                                          Navigator.of(context).push(
+                                        MaterialPageRoute<void>(
+                                          builder: (_) =>
+                                              ViajeTelemetriaScreen(
+                                            viaje: v,
+                                            rolWs:
+                                                TelemetriaWsRol.admin,
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
+        ),
+      ),
     );
   }
 }

@@ -11,7 +11,7 @@ services:
       POSTGRES_PASSWORD: smartcase_password
       POSTGRES_DB: smartcase_db
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - ./ESP32/bd.sql:/docker-entrypoint-initdb.d/01_init.sql
       - postgres_data:/var/lib/postgresql/data
@@ -40,6 +40,7 @@ services:
       - DB_PASSWORD=smartcase_password
       - DB_NAME=smartcase_db
       - PORT=8080
+      - SECRET=smartcase_secret_key_2026
     depends_on:
       db:
         condition: service_healthy

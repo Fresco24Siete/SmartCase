@@ -2,15 +2,14 @@
 
 import 'package:flutter/material.dart';
 
-import '../../admin/clinica_api.dart';
-import '../../auth/ui/auth_tabs_screen.dart';
-import '../../core/session_store.dart';
+import '../../auth/logout_action.dart';
+import '../../core/theme/app_colors.dart';
 import '../conductor_viaje_api.dart';
 import '../models/viaje.dart';
 import 'conductor_viaje_detalle_screen.dart';
 
 class ConductorHomeScreen extends StatefulWidget {
-  ConductorHomeScreen({super.key});
+  const ConductorHomeScreen({super.key});
 
   @override
   State<ConductorHomeScreen> createState() => _ConductorHomeScreenState();
@@ -48,83 +47,124 @@ class _ConductorHomeScreenState extends State<ConductorHomeScreen> {
     }
   }
 
-  Future<void> _cerrarSesion() async {
-    final confirmar = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Cerrar sesión'),
-        content: const Text('¿Seguro que deseas cerrar sesión?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancelar'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Cerrar sesión'),
-          ),
-        ],
-      ),
-    );
-
-    if (confirmar != true || !mounted) return;
-
-    SessionStore.instance.clear();
-    await ClinicaApi.sharedClient.clearSession();
-
-    if (!mounted) return;
-    Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
-      MaterialPageRoute<void>(builder: (_) => const AuthTabsScreen()),
-      (_) => false,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Mis viajes'),
+        backgroundColor: AppColors.surface,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        titleSpacing: 20,
+        title: Row(
+          children: [
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: AppColors.surfaceSubtle,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: AppColors.border),
+              ),
+              child: const Icon(
+                Icons.directions_car_outlined,
+                color: AppColors.textPrimary,
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 12),
+            const Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Mis Viajes Asignados',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary,
+                    letterSpacing: -0.3,
+                  ),
+                ),
+                Text(
+                  'Conductor SmartCase',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w400,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
         actions: [
           IconButton(
             tooltip: 'Actualizar',
             onPressed: _cargando ? null : _cargarViajes,
-            icon: const Icon(Icons.refresh_outlined),
+            icon: const Icon(Icons.refresh_rounded, size: 20),
           ),
-          IconButton(
-            tooltip: 'Cerrar sesión',
-            onPressed: _cerrarSesion,
-            icon: const Icon(Icons.logout_outlined),
-          ),
+          const LogoutAppBarButton(),
+          const SizedBox(width: 8),
         ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(color: AppColors.border, height: 1),
+        ),
       ),
-      body: _buildBody(),
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 800),
+          child: _buildBody(),
+        ),
+      ),
     );
   }
 
   Widget _buildBody() {
     if (_cargando) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(
+        child: CircularProgressIndicator(
+          strokeWidth: 2.5,
+          color: AppColors.primary,
+        ),
+      );
     }
 
     if (_error != null) {
       return Center(
         child: Padding(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(32),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.cloud_off_outlined,
-                  size: 48, color: Color(0xFF888780)),
-              const SizedBox(height: 12),
+              Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  color: AppColors.errorSubtle,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: AppColors.error.withOpacity(0.2)),
+                ),
+                child: const Icon(
+                  Icons.cloud_off_rounded,
+                  size: 28,
+                  color: AppColors.error,
+                ),
+              ),
+              const SizedBox(height: 16),
               Text(
                 _error!,
                 textAlign: TextAlign.center,
-                style: const TextStyle(color: Color(0xFF888780)),
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: AppColors.textSecondary,
+                  height: 1.4,
+                ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
               FilledButton.icon(
                 onPressed: _cargarViajes,
-                icon: const Icon(Icons.refresh_outlined, size: 18),
+                icon: const Icon(Icons.refresh_rounded, size: 18),
                 label: const Text('Reintentar'),
               ),
             ],
@@ -134,20 +174,57 @@ class _ConductorHomeScreenState extends State<ConductorHomeScreen> {
     }
 
     if (_viajes.isEmpty) {
-      return const Center(
-        child: Text(
-          'No tienes viajes asignados.',
-          style: TextStyle(color: Color(0xFF888780)),
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceSubtle,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: AppColors.border),
+                ),
+                child: const Icon(
+                  Icons.inbox_outlined,
+                  size: 28,
+                  color: AppColors.textMuted,
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'No tienes viajes asignados',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 6),
+              const Text(
+                'Cuando un administrador te asigne un traslado, aparecerá aquí.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 13,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ],
+          ),
         ),
       );
     }
 
     return RefreshIndicator(
       onRefresh: _cargarViajes,
+      color: AppColors.primary,
       child: ListView.separated(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
         itemCount: _viajes.length,
-        separatorBuilder: (_, __) => const SizedBox(height: 8),
+        separatorBuilder: (_, __) => const SizedBox(height: 12),
         itemBuilder: (context, index) {
           final viaje = _viajes[index];
           return _ViajeCard(
@@ -173,98 +250,169 @@ class _ViajeCard extends StatelessWidget {
   final Viaje viaje;
   final VoidCallback onTap;
 
-  Color _estadoColor(String? estado) {
+  (Color, Color) _estadoTheme(String? estado) {
     switch (estado?.toLowerCase()) {
       case 'transito':
-        return const Color(0xFF185FA5);
+        return (AppColors.primaryAccent, AppColors.primarySubtle);
       case 'entregado':
-        return const Color(0xFF1D9E75);
+        return (AppColors.success, AppColors.successSubtle);
       case 'muestra comprometida':
-        return const Color(0xFFE24B4A);
+        return (AppColors.error, AppColors.errorSubtle);
       default:
-        return const Color(0xFF888780);
+        return (AppColors.textSecondary, AppColors.surfaceSubtle);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final estadoColor = _estadoColor(viaje.estadoViaje);
+    final (textColor, bgColor) = _estadoTheme(viaje.estadoViaje);
 
-    return Card(
+    return Material(
+      color: AppColors.surface,
+      borderRadius: BorderRadius.circular(16),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.border),
+          ),
+          padding: const EdgeInsets.all(18),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // ── Header con ID y Estado ──────────────────────────────
               Row(
                 children: [
-                  Expanded(
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: AppColors.surfaceSubtle,
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(color: AppColors.borderSubtle),
+                    ),
                     child: Text(
-                      '# ${viaje.idCorto}',
-                      style: Theme.of(context).textTheme.bodySmall,
+                      'VIAJE #${viaje.idCorto}',
+                      style: const TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimary,
+                        letterSpacing: 0.4,
+                      ),
                     ),
                   ),
+                  const Spacer(),
                   Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 4),
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
-                      color: estadoColor.withValues(alpha: 0.12),
+                      color: bgColor,
                       borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: textColor.withOpacity(0.2)),
                     ),
                     child: Text(
-                      viaje.estadoViaje ?? 'Sin estado',
+                      viaje.estadoViaje?.toUpperCase() ?? 'SIN ESTADO',
                       style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: estadoColor,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: textColor,
+                        letterSpacing: 0.3,
                       ),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 14),
+
+              // ── Ruta Origen -> Destino ───────────────────────────────
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(Icons.trip_origin,
-                      size: 14, color: Color(0xFF1D9E75)),
-                  const SizedBox(width: 6),
+                  Column(
+                    children: [
+                      const Icon(
+                        Icons.trip_origin_rounded,
+                        size: 14,
+                        color: AppColors.primaryAccent,
+                      ),
+                      Container(
+                        width: 1.5,
+                        height: 20,
+                        color: AppColors.border,
+                        margin: const EdgeInsets.symmetric(vertical: 2),
+                      ),
+                      const Icon(
+                        Icons.location_on_rounded,
+                        size: 15,
+                        color: AppColors.error,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(width: 10),
                   Expanded(
-                    child: Text(
-                      viaje.idSedeOrigen,
-                      style: const TextStyle(
-                          fontSize: 13, fontWeight: FontWeight.w500),
-                      overflow: TextOverflow.ellipsis,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          viaje.idSedeOrigen,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textPrimary,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          viaje.idSedeDestino,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textPrimary,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
                     ),
                   ),
-                  const Icon(Icons.arrow_forward,
-                      size: 14, color: Color(0xFF888780)),
-                  const SizedBox(width: 6),
-                  const Icon(Icons.place_outlined,
-                      size: 14, color: Color(0xFFE24B4A)),
-                  const SizedBox(width: 4),
-                  Expanded(
-                    child: Text(
-                      viaje.idSedeDestino,
-                      style: const TextStyle(
-                          fontSize: 13, fontWeight: FontWeight.w500),
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                  const Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    color: AppColors.textMuted,
+                    size: 14,
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 14),
+              const Divider(),
+              const SizedBox(height: 10),
+
+              // ── Fecha / SmartCase ────────────────────────────────────
               Row(
                 children: [
-                  const Icon(Icons.schedule_outlined,
-                      size: 13, color: Color(0xFF888780)),
-                  const SizedBox(width: 4),
+                  const Icon(
+                    Icons.schedule_rounded,
+                    size: 14,
+                    color: AppColors.textMuted,
+                  ),
+                  const SizedBox(width: 6),
                   Text(
                     viaje.fechaInicio,
                     style: const TextStyle(
-                        fontSize: 12, color: Color(0xFF888780)),
+                      fontSize: 12,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  const Spacer(),
+                  const Text(
+                    'Ver telemetría y sensores',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.primaryAccent,
+                    ),
                   ),
                 ],
               ),

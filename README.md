@@ -13,12 +13,26 @@ El proyecto resuelve la problemática de "puntos ciegos" en la fase preanalític
 
 ## Vista General de la Interfaz
 
-| Panel de Monitoreo General (Web) | Aplicación Móvil del Conductor |
-| :---: | :---: |
-| ![Dashboard de Monitoreo GPS y Telemetría](docs/images/dashboard_map.jpg) | ![App Móvil del Conductor con Desbloqueo por PIN](docs/images/conductor_app.jpg) |
+La plataforma cuenta con interfaces reactivas y adaptadas para cada perfil operacional del sistema:
 
-### Panel Administrativo y Gestión de Trayectos
-![Panel de Administración General](docs/images/admin_panel.jpg)
+### 1. Panel de Monitoreo General y Telemetría en Vivo (Web SPA)
+Supervisión centralizada en tiempo real de la cadena de frío (temperatura interna y exterior), condiciones ambientales (humedad, luminosidad, altitud, acelerometría de impacto) y trazado GPS sobre OpenStreetMap.
+
+| Telemetría IoT en Vivo y Rastreo GPS | Panel Administrativo de Recursos |
+| :---: | :---: |
+| ![Dashboard de Monitoreo GPS y Telemetría](docs/images/dashboard_map.jpg) | ![Panel de Administración General](docs/images/admin_panel.jpg) |
+
+### 2. Aplicaciones Móviles Operativas (Conductor y Médico Receptor)
+Clientes con soporte responsivo para la custodia física del contenedor inteligente, trazado en ruta y desbloqueo seguro de la cerradura electromagnética mediante código PIN:
+
+| App Móvil del Conductor (En Tránsito y Validación de PIN) | App Móvil del Médico Receptor (Custodia y Recepción) |
+| :---: | :---: |
+| ![App Móvil del Conductor](docs/images/conductor_app.jpg) | ![App Móvil del Médico Receptor](docs/images/receptor_app.jpg) |
+
+### 3. Asignación y Despacho de Nuevos Viajes
+Módulo administrativo para la creación y despacho de traslados, vinculando la caja SmartCase, vehículo de transporte, clínica/sede origen y destino, conductor y médico receptor:
+
+![Creación y Asignación de Viajes](docs/images/admin_crear_viaje.jpg)
 
 ---
 

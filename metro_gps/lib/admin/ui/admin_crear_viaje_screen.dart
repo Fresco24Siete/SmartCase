@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/app_colors.dart';
 import '../ambulancia_api.dart';
 import '../clinica_api.dart';
 import '../models/ambulancia.dart';
@@ -267,10 +268,9 @@ class _AdminCrearViajeScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AdminColors.surface,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text('Crear viaje'),
-        backgroundColor: AdminColors.navy,
       ),
       body: _cargando
           ? const Center(child: CircularProgressIndicator())
@@ -278,12 +278,15 @@ class _AdminCrearViajeScreenState
               ? AdminErrorState(
                   message: _error!,
                   onRetry: _cargarCatalogos)
-              : Form(
-                  key: _formKey,
-                  child: ListView(
-                    padding: const EdgeInsets.fromLTRB(
-                        16, 16, 16, 100),
-                    children: [
+              : Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 720),
+                    child: Form(
+                      key: _formKey,
+                      child: ListView(
+                        padding: const EdgeInsets.fromLTRB(
+                            16, 16, 16, 100),
+                        children: [
                       // ── Ruta ───────────────────────────────────
                       const AdminSectionHeader(
                         'Ruta de transporte',
@@ -543,6 +546,8 @@ class _AdminCrearViajeScreenState
                     ],
                   ),
                 ),
+              ),
+            ),
     );
   }
 

@@ -4,20 +4,20 @@ import 'package:flutter/material.dart';
 /// Importa este archivo desde cualquier pantalla admin para acceder
 /// a [AdminTheme], [AdminColors] y los widgets reutilizables.
 abstract class AdminColors {
-  static const navy = Color(0xFF0A1628);
-  static const navyMid = Color(0xFF112240);
-  static const navyLight = Color(0xFF1E3A5F);
-  static const cyan = Color(0xFF00C8FF);
-  static const cyanDim = Color(0xFF0096C7);
-  static const surface = Color(0xFFF0F4F8);
+  static const navy = Color(0xFF0F172A);
+  static const navyMid = Color(0xFF1E293B);
+  static const navyLight = Color(0xFF334155);
+  static const cyan = Color(0xFF0284C7);
+  static const cyanDim = Color(0xFF0284C7);
+  static const surface = Color(0xFFF8FAFC);
   static const surfaceCard = Color(0xFFFFFFFF);
-  static const textPrimary = Color(0xFF0A1628);
-  static const textSecondary = Color(0xFF5A7184);
-  static const textMuted = Color(0xFF8FA3B1);
-  static const success = Color(0xFF00B686);
-  static const warning = Color(0xFFF5A623);
-  static const danger = Color(0xFFE53935);
-  static const divider = Color(0xFFE1E8ED);
+  static const textPrimary = Color(0xFF0F172A);
+  static const textSecondary = Color(0xFF475569);
+  static const textMuted = Color(0xFF94A3B8);
+  static const success = Color(0xFF10B981);
+  static const warning = Color(0xFFF59E0B);
+  static const danger = Color(0xFFEF4444);
+  static const divider = Color(0xFFE2E8F0);
 }
 
 abstract class AdminTheme {
@@ -26,35 +26,35 @@ abstract class AdminTheme {
         colorScheme: ColorScheme.fromSeed(
           seedColor: AdminColors.cyanDim,
           brightness: Brightness.light,
-          primary: AdminColors.cyanDim,
+          primary: AdminColors.navy,
           onPrimary: Colors.white,
           secondary: AdminColors.navyLight,
           onSecondary: Colors.white,
-          surface: AdminColors.surface,
+          surface: AdminColors.surfaceCard,
           onSurface: AdminColors.textPrimary,
           error: AdminColors.danger,
         ),
         scaffoldBackgroundColor: AdminColors.surface,
         appBarTheme: const AppBarTheme(
-          backgroundColor: AdminColors.navy,
-          foregroundColor: Colors.white,
+          backgroundColor: Colors.white,
+          foregroundColor: AdminColors.textPrimary,
           elevation: 0,
+          scrolledUnderElevation: 0,
           centerTitle: false,
           titleTextStyle: TextStyle(
-            color: Colors.white,
+            color: AdminColors.textPrimary,
             fontSize: 18,
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w600,
             letterSpacing: -0.3,
           ),
-          iconTheme: IconThemeData(color: Colors.white),
-          actionsIconTheme: IconThemeData(color: Colors.white),
+          iconTheme: IconThemeData(color: AdminColors.textPrimary),
+          actionsIconTheme: IconThemeData(color: AdminColors.textPrimary),
         ),
-        // Cambia 'CardTheme' por 'CardThemeData'
         cardTheme: const CardThemeData(
           color: AdminColors.surfaceCard,
           elevation: 0.0,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(12.0)),
+            borderRadius: BorderRadius.all(Radius.circular(16.0)),
             side: BorderSide(color: AdminColors.divider, width: 1.0),
           ),
           margin: EdgeInsets.zero,

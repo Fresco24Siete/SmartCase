@@ -11,6 +11,7 @@ import '../../core/telemetria_api.dart';
 import '../../core/telemetria_ws_client.dart';
 import '../../core/telemetria_ws_paths.dart';
 import '../../conductor/models/viaje.dart';
+import '../../core/theme/app_colors.dart';
 import 'viaje_mapa_widget.dart';
 
 class ViajeTelemetriaScreen extends StatefulWidget {
@@ -108,23 +109,26 @@ class _ViajeTelemetriaScreenState extends State<ViajeTelemetriaScreen> {
     final tienePin = widget.pinEntrega != null && widget.pinEntrega!.isNotEmpty;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F6FA),
+      backgroundColor: AppColors.background,
       appBar: _buildAppBar(v),
       body: _cargando
           ? _buildLoading()
-          : CustomScrollView(
-              slivers: [
-                // ── Banner WebSocket ─────────────────────────────────────
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                    child: _WsStatusBanner(
-                      estado: _estadoWs,
-                      totalRegistros: _registros.length,
-                      ultimaLectura: _ultimo?.registradoEn,
+          : Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 860),
+                child: CustomScrollView(
+                  slivers: [
+                    // ── Banner WebSocket ─────────────────────────────────────
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                        child: _WsStatusBanner(
+                          estado: _estadoWs,
+                          totalRegistros: _registros.length,
+                          ultimaLectura: _ultimo?.registradoEn,
+                        ),
+                      ),
                     ),
-                  ),
-                ),
 
                 // ── PIN de entrega (solo receptor) ───────────────────────
                 if (tienePin)
@@ -289,6 +293,8 @@ class _ViajeTelemetriaScreenState extends State<ViajeTelemetriaScreen> {
                 ),
               ],
             ),
+          ),
+        ),
     );
   }
 
@@ -303,32 +309,32 @@ class _ViajeTelemetriaScreenState extends State<ViajeTelemetriaScreen> {
         padding: padding,
         child: Row(
           children: [
-            Icon(icon, size: 15, color: const Color(0xFF8A94A6)),
+            Icon(icon, size: 14, color: AppColors.textSecondary),
             const SizedBox(width: 6),
             Text(
               label.toUpperCase(),
               style: const TextStyle(
-                fontSize: 10,
+                fontSize: 11,
                 fontWeight: FontWeight.w700,
-                color: Color(0xFF8A94A6),
-                letterSpacing: 0.7,
+                color: AppColors.textSecondary,
+                letterSpacing: 0.8,
               ),
             ),
             if (badge != null) ...[
               const SizedBox(width: 8),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF0F4FF),
-                  borderRadius: BorderRadius.circular(20),
+                  color: AppColors.primarySubtle,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: AppColors.primaryAccent.withOpacity(0.2)),
                 ),
                 child: Text(
                   badge,
                   style: const TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF1A73E8),
+                    color: AppColors.primaryAccent,
                   ),
                 ),
               ),
@@ -342,14 +348,14 @@ class _ViajeTelemetriaScreenState extends State<ViajeTelemetriaScreen> {
   PreferredSizeWidget _buildAppBar(Viaje v) {
     final enVivo = _estadoWs == 'En vivo';
     return AppBar(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.surface,
       elevation: 0,
-      surfaceTintColor: Colors.transparent,
+      scrolledUnderElevation: 0,
       leading: IconButton(
         icon: const Icon(
           Icons.arrow_back_ios_new_rounded,
-          size: 18,
-          color: Color(0xFF1A1F36),
+          size: 16,
+          color: AppColors.textPrimary,
         ),
         onPressed: () => Navigator.of(context).pop(),
       ),
@@ -359,16 +365,21 @@ class _ViajeTelemetriaScreenState extends State<ViajeTelemetriaScreen> {
             padding: const EdgeInsets.all(7),
             decoration: BoxDecoration(
               color: enVivo
-                  ? const Color(0xFFE6F4EA)
-                  : const Color(0xFFF0F4FF),
+                  ? AppColors.successSubtle
+                  : AppColors.surfaceSubtle,
               borderRadius: BorderRadius.circular(9),
+              border: Border.all(
+                color: enVivo
+                    ? AppColors.success.withOpacity(0.3)
+                    : AppColors.border,
+              ),
             ),
             child: Icon(
               enVivo ? Icons.sensors_rounded : Icons.sensors_off_rounded,
               size: 18,
               color: enVivo
-                  ? const Color(0xFF1B873F)
-                  : const Color(0xFF1A73E8),
+                  ? AppColors.success
+                  : AppColors.textMuted,
             ),
           ),
           const SizedBox(width: 10),
@@ -376,21 +387,20 @@ class _ViajeTelemetriaScreenState extends State<ViajeTelemetriaScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                widget.titulo ?? 'Telemetría ${v.idCorto}',
+                widget.titulo ?? 'Telemetría #${v.idCorto}',
                 style: const TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
-                  color: Color(0xFF1A1F36),
+                  color: AppColors.textPrimary,
                   letterSpacing: -0.2,
                 ),
               ),
               Text(
-                widget.rolWs.name[0].toUpperCase() +
-                    widget.rolWs.name.substring(1),
+                'Canal: ${widget.rolWs.name[0].toUpperCase()}${widget.rolWs.name.substring(1)}',
                 style: const TextStyle(
                   fontSize: 11,
-                  fontWeight: FontWeight.w500,
-                  color: Color(0xFF8A94A6),
+                  fontWeight: FontWeight.w400,
+                  color: AppColors.textSecondary,
                 ),
               ),
             ],
@@ -399,30 +409,30 @@ class _ViajeTelemetriaScreenState extends State<ViajeTelemetriaScreen> {
       ),
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(1),
-        child: Container(height: 1, color: const Color(0xFFE8ECF2)),
+        child: Container(height: 1, color: AppColors.border),
       ),
     );
   }
 
   Widget _buildLoading() {
-    return Center(
+    return const Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const SizedBox(
+          SizedBox(
             width: 32,
             height: 32,
             child: CircularProgressIndicator(
               strokeWidth: 2.5,
-              color: Color(0xFF1A73E8),
+              color: AppColors.primary,
             ),
           ),
-          const SizedBox(height: 14),
+          SizedBox(height: 14),
           Text(
             'Cargando telemetría…',
             style: TextStyle(
               fontSize: 13,
-              color: Colors.grey.shade500,
+              color: AppColors.textSecondary,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -441,32 +451,33 @@ class _ViajeTelemetriaScreenState extends State<ViajeTelemetriaScreen> {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: const Color(0xFFF0F4FF),
+                color: AppColors.surfaceSubtle,
                 borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: AppColors.border),
               ),
               child: const Icon(
                 Icons.sensors_rounded,
-                size: 40,
-                color: Color(0xFF1A73E8),
+                size: 36,
+                color: AppColors.textMuted,
               ),
             ),
-            const SizedBox(height: 18),
+            const SizedBox(height: 16),
             const Text(
               'Sin datos aún',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
-                color: Color(0xFF1A1F36),
+                color: AppColors.textPrimary,
               ),
             ),
             const SizedBox(height: 6),
             const Text(
-              'Esperando telemetría del conductor…',
+              'Esperando lecturas de sensores del conductor…',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 13,
-                color: Color(0xFF8A94A6),
-                height: 1.5,
+                color: AppColors.textSecondary,
+                height: 1.4,
               ),
             ),
           ],
@@ -509,9 +520,9 @@ class _SensorCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE8ECF2)),
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -534,7 +545,7 @@ class _SensorCard extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF8A94A6),
+                    color: AppColors.textSecondary,
                   ),
                 ),
               ),
@@ -549,8 +560,9 @@ class _SensorCard extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF1A1F36),
+                    color: AppColors.textPrimary,
                     height: 1,
+                    letterSpacing: -0.5,
                   ),
                 ),
                 if (unit.isNotEmpty)
@@ -559,7 +571,7 @@ class _SensorCard extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
-                      color: Color(0xFF8A94A6),
+                      color: AppColors.textSecondary,
                     ),
                   ),
               ],
@@ -569,8 +581,8 @@ class _SensorCard extends StatelessWidget {
           Text(
             sub,
             style: const TextStyle(
-              fontSize: 10,
-              color: Color(0xFF8A94A6),
+              fontSize: 11,
+              color: AppColors.textMuted,
             ),
           ),
         ],
@@ -590,15 +602,15 @@ class _AlertaCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFEBEE),
+        color: AppColors.errorSubtle,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFFFCDD2)),
+        border: Border.all(color: AppColors.error.withOpacity(0.3)),
       ),
       child: Row(
         children: [
           const Icon(
             Icons.warning_amber_rounded,
-            color: Color(0xFFB71C1C),
+            color: AppColors.error,
             size: 20,
           ),
           const SizedBox(width: 12),
@@ -608,7 +620,7 @@ class _AlertaCard extends StatelessWidget {
               style: const TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFFB71C1C),
+                color: AppColors.error,
               ),
             ),
           ),
@@ -628,29 +640,29 @@ class _HistorialButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(14),
+      color: AppColors.surface,
+      borderRadius: BorderRadius.circular(16),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(16),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: const Color(0xFFE8ECF2)),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.border),
           ),
           child: Row(
             children: [
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF0F4FF),
+                  color: AppColors.primarySubtle,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Icon(
                   Icons.history_rounded,
                   size: 18,
-                  color: Color(0xFF1A73E8),
+                  color: AppColors.primaryAccent,
                 ),
               ),
               const SizedBox(width: 14),
@@ -663,15 +675,16 @@ class _HistorialButton extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: Color(0xFF1A1F36),
+                        color: AppColors.textPrimary,
+                        letterSpacing: -0.2,
                       ),
                     ),
                     SizedBox(height: 2),
                     Text(
                       'Todos los registros del viaje',
                       style: TextStyle(
-                        fontSize: 11,
-                        color: Color(0xFF8A94A6),
+                        fontSize: 12,
+                        color: AppColors.textSecondary,
                       ),
                     ),
                   ],
@@ -682,23 +695,24 @@ class _HistorialButton extends StatelessWidget {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF0F4FF),
+                    color: AppColors.surfaceSubtle,
                     borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: AppColors.border),
                   ),
                   child: Text(
                     '$total',
                     style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFF1A73E8),
+                      color: AppColors.textPrimary,
                     ),
                   ),
                 ),
               const SizedBox(width: 8),
               const Icon(
-                Icons.chevron_right_rounded,
-                size: 20,
-                color: Color(0xFF8A94A6),
+                Icons.arrow_forward_ios_rounded,
+                size: 14,
+                color: AppColors.textMuted,
               ),
             ],
           ),
@@ -725,19 +739,18 @@ class _HistorialSheet extends StatelessWidget {
       expand: false,
       builder: (_, controller) => Container(
         decoration: const BoxDecoration(
-          color: Color(0xFFF4F6FA),
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          color: AppColors.background,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
         child: Column(
           children: [
             // Handle + cabecera
             Container(
               decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius:
-                    BorderRadius.vertical(top: Radius.circular(20)),
+                color: AppColors.surface,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
                 border: Border(
-                  bottom: BorderSide(color: Color(0xFFE8ECF2)),
+                  bottom: BorderSide(color: AppColors.border),
                 ),
               ),
               child: Column(
@@ -747,7 +760,7 @@ class _HistorialSheet extends StatelessWidget {
                     width: 36,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: const Color(0xFFE8ECF2),
+                      color: AppColors.border,
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -758,7 +771,7 @@ class _HistorialSheet extends StatelessWidget {
                         const Icon(
                           Icons.history_rounded,
                           size: 18,
-                          color: Color(0xFF1A73E8),
+                          color: AppColors.primaryAccent,
                         ),
                         const SizedBox(width: 10),
                         const Text(
@@ -766,15 +779,18 @@ class _HistorialSheet extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w700,
-                            color: Color(0xFF1A1F36),
+                            color: AppColors.textPrimary,
+                            letterSpacing: -0.2,
                           ),
                         ),
                         const Spacer(),
                         Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 4),
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFF0F4FF),
+                            color: AppColors.primarySubtle,
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(
@@ -782,7 +798,7 @@ class _HistorialSheet extends StatelessWidget {
                             style: const TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.w600,
-                              color: Color(0xFF1A73E8),
+                              color: AppColors.primaryAccent,
                             ),
                           ),
                         ),
@@ -827,12 +843,12 @@ class _HistorialItem extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(14),
         border: Border.all(
           color: tieneAlerta
-              ? const Color(0xFFFFCDD2)
-              : const Color(0xFFE8ECF2),
+              ? AppColors.error.withOpacity(0.4)
+              : AppColors.border,
         ),
       ),
       child: Column(
@@ -844,7 +860,7 @@ class _HistorialItem extends StatelessWidget {
               const Icon(
                 Icons.access_time_rounded,
                 size: 13,
-                color: Color(0xFF8A94A6),
+                color: AppColors.textSecondary,
               ),
               const SizedBox(width: 5),
               Text(
@@ -852,25 +868,25 @@ class _HistorialItem extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
-                  color: Color(0xFF1A1F36),
+                  color: AppColors.textPrimary,
                   fontFamily: 'monospace',
                 ),
               ),
               const Spacer(),
               if (tieneAlerta)
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFFFEBEE),
+                    color: AppColors.errorSubtle,
                     borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: AppColors.error.withOpacity(0.3)),
                   ),
                   child: Text(
                     r.alertaGenerada!,
                     style: const TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFFB71C1C),
+                      color: AppColors.error,
                     ),
                   ),
                 ),
@@ -883,30 +899,39 @@ class _HistorialItem extends StatelessWidget {
             runSpacing: 8,
             children: [
               _MiniVal(
-                  label: 'T. interna',
-                  value: '${r.temperaturaInterna.toStringAsFixed(1)} °C'),
+                label: 'T. interna',
+                value: '${r.temperaturaInterna.toStringAsFixed(1)} °C',
+              ),
               if (r.tempAmbiente != null)
                 _MiniVal(
-                    label: 'T. amb.',
-                    value: '${r.tempAmbiente!.toStringAsFixed(1)} °C'),
+                  label: 'T. amb.',
+                  value: '${r.tempAmbiente!.toStringAsFixed(1)} °C',
+                ),
               if (r.humedad != null)
                 _MiniVal(
-                    label: 'Humedad',
-                    value: '${r.humedad!.toStringAsFixed(0)} %'),
+                  label: 'Humedad',
+                  value: '${r.humedad!.toStringAsFixed(0)} %',
+                ),
               if (r.lux != null)
                 _MiniVal(
-                    label: 'Lux', value: '${r.lux!.toStringAsFixed(0)}'),
+                  label: 'Lux',
+                  value: '${r.lux!.toStringAsFixed(0)}',
+                ),
               if (r.altitud != null)
                 _MiniVal(
-                    label: 'Altitud',
-                    value: '${r.altitud!.toStringAsFixed(0)} m'),
+                  label: 'Altitud',
+                  value: '${r.altitud!.toStringAsFixed(0)} m',
+                ),
               _MiniVal(
-                  label: 'G', value: r.fuerzaG.toStringAsFixed(2)),
+                label: 'Fuerza G',
+                value: r.fuerzaG.toStringAsFixed(2),
+              ),
               if (r.latitud != 0 || r.longitud != 0)
                 _MiniVal(
-                    label: 'GPS',
-                    value:
-                        '${r.latitud.toStringAsFixed(4)}, ${r.longitud.toStringAsFixed(4)}'),
+                  label: 'GPS',
+                  value:
+                      '${r.latitud.toStringAsFixed(4)}, ${r.longitud.toStringAsFixed(4)}',
+                ),
             ],
           ),
         ],
@@ -935,14 +960,17 @@ class _MiniVal extends StatelessWidget {
       children: [
         Text(
           label,
-          style: const TextStyle(fontSize: 10, color: Color(0xFF8A94A6)),
+          style: const TextStyle(
+            fontSize: 10,
+            color: AppColors.textSecondary,
+          ),
         ),
         Text(
           value,
           style: const TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w600,
-            color: Color(0xFF1A1F36),
+            color: AppColors.textPrimary,
           ),
         ),
       ],
@@ -969,9 +997,9 @@ class _WsStatusBanner extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE8ECF2)),
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.border),
       ),
       child: Row(
         children: [
@@ -979,16 +1007,21 @@ class _WsStatusBanner extends StatelessWidget {
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               color: enVivo
-                  ? const Color(0xFFE6F4EA)
-                  : const Color(0xFFFFF8E1),
+                  ? AppColors.successSubtle
+                  : AppColors.warningSubtle,
               borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: enVivo
+                    ? AppColors.success.withOpacity(0.3)
+                    : AppColors.warning.withOpacity(0.3),
+              ),
             ),
             child: Icon(
               enVivo ? Icons.sensors_rounded : Icons.cloud_off_rounded,
               size: 18,
               color: enVivo
-                  ? const Color(0xFF1B873F)
-                  : const Color(0xFFB45309),
+                  ? AppColors.success
+                  : AppColors.warning,
             ),
           ),
           const SizedBox(width: 12),
@@ -1002,15 +1035,15 @@ class _WsStatusBanner extends StatelessWidget {
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
                     color: enVivo
-                        ? const Color(0xFF1B873F)
-                        : const Color(0xFFB45309),
+                        ? AppColors.success
+                        : AppColors.warning,
                   ),
                 ),
                 Text(
                   '$totalRegistros lecturas recibidas',
                   style: const TextStyle(
-                    fontSize: 11,
-                    color: Color(0xFF8A94A6),
+                    fontSize: 12,
+                    color: AppColors.textSecondary,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -1022,7 +1055,7 @@ class _WsStatusBanner extends StatelessWidget {
               _fmtHora(ultimaLectura!),
               style: const TextStyle(
                 fontSize: 11,
-                color: Color(0xFF8A94A6),
+                color: AppColors.textSecondary,
                 fontFamily: 'monospace',
                 fontWeight: FontWeight.w500,
               ),
@@ -1080,7 +1113,7 @@ class _PulseDotState extends State<_PulseDot>
         width: 10,
         height: 10,
         decoration: const BoxDecoration(
-          color: Color(0xFF1B873F),
+          color: AppColors.success,
           shape: BoxShape.circle,
         ),
       ),
@@ -1116,9 +1149,9 @@ class _PinEntregaWidgetState extends State<_PinEntregaWidget> {
         behavior: SnackBarBehavior.floating,
         shape:
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        backgroundColor: const Color(0xFF1B873F),
+        backgroundColor: AppColors.primary,
         duration: const Duration(seconds: 2),
-        margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        margin: const EdgeInsets.all(16),
       ),
     );
   }
@@ -1128,20 +1161,20 @@ class _PinEntregaWidgetState extends State<_PinEntregaWidget> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFF8E1),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFFFE082)),
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.border),
       ),
       child: Row(
         children: [
-          const Icon(Icons.key_rounded, size: 17, color: Color(0xFFB45309)),
+          const Icon(Icons.key_rounded, size: 17, color: AppColors.primaryAccent),
           const SizedBox(width: 8),
           const Text(
             'PIN de entrega',
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w700,
-              color: Color(0xFFB45309),
+              color: AppColors.textPrimary,
             ),
           ),
           const SizedBox(width: 12),
@@ -1152,8 +1185,8 @@ class _PinEntregaWidgetState extends State<_PinEntregaWidget> {
                 fontSize: 15,
                 fontWeight: FontWeight.w800,
                 color: _visible
-                    ? const Color(0xFF1A1F36)
-                    : const Color(0xFFB45309),
+                    ? AppColors.textPrimary
+                    : AppColors.textSecondary,
                 letterSpacing: _visible ? 3 : 5,
                 fontFamily: 'monospace',
               ),
@@ -1168,7 +1201,7 @@ class _PinEntregaWidgetState extends State<_PinEntregaWidget> {
                     ? Icons.visibility_off_outlined
                     : Icons.visibility_outlined,
                 size: 19,
-                color: const Color(0xFFB45309),
+                color: AppColors.textSecondary,
               ),
             ),
           ),
@@ -1180,7 +1213,7 @@ class _PinEntregaWidgetState extends State<_PinEntregaWidget> {
               child: Icon(
                 Icons.copy_rounded,
                 size: 17,
-                color: Color(0xFFB45309),
+                color: AppColors.textSecondary,
               ),
             ),
           ),

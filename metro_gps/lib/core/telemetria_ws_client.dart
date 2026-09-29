@@ -70,15 +70,15 @@ class TelemetriaWsClient {
     }
 
     try {
-      if (!kIsWeb && (Platform.isAndroid || Platform.isIOS || Platform.isWindows)) {
+      if (kIsWeb) {
+        _channel = WebSocketChannel.connect(uri);
+      } else {
         final socket = await WebSocket.connect(
           uri.toString(),
           headers: headers,
         );
         socket.pingInterval = const Duration(seconds: 25);
         _channel = IOWebSocketChannel(socket);
-      } else {
-        _channel = IOWebSocketChannel.connect(uri, headers: headers);
       }
 
       _sub = _channel!.stream.listen(

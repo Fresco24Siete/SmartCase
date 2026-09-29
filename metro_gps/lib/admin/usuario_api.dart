@@ -30,7 +30,20 @@ class UsuarioApi {
     try {
       final response = await _client.get(path);
       if (response.statusCode >= 200 && response.statusCode < 300) {
-        final decoded = jsonDecode(response.body);
+        final body = response.body.trim();
+        if (body.isEmpty || body == 'null') {
+          return UsuarioApiResult(
+            statusCode: response.statusCode,
+            data: const [],
+          );
+        }
+        final decoded = jsonDecode(body);
+        if (decoded == null) {
+          return UsuarioApiResult(
+            statusCode: response.statusCode,
+            data: const [],
+          );
+        }
         if (decoded is List) {
           final lista = <UsuarioConductor>[];
           for (final item in decoded) {

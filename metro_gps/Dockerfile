@@ -20,7 +20,7 @@ COPY pubspec.yaml pubspec.lock ./
 RUN flutter pub get
 
 COPY . .
-RUN flutter build web --release --dart-define=API_BASE_URL=http://localhost:8080
+RUN flutter build web --release --pwa-strategy=none --dart-define=API_BASE_URL=http://localhost:8080
 
 # Stage 2: Serve static files with Nginx
 FROM nginx:alpine

@@ -4,7 +4,7 @@ Esta guía explica cómo ejecutar, construir y mantener el stack de **SmartCase*
 
 ---
 
-## 🚀 Inicio Rápido con Docker Compose
+## Inicio Rápido con Docker Compose
 
 La forma más sencilla de levantar el ecosistema completo (Base de datos + API Backend + Frontend Web) es usando `docker-compose.yml`.
 
@@ -30,7 +30,7 @@ docker compose ps
 
 ---
 
-## 🛠️ Dockerfiles del Proyecto
+## Dockerfiles del Proyecto
 
 ### 1. Backend (`backend/Dockerfile`)
 Utiliza una estrategia de compilación multi-etapa (*multi-stage build*):
@@ -43,7 +43,7 @@ Utiliza una estrategia de compilación multi-etapa (*multi-stage build*):
 
 ---
 
-## 🔍 Comandos Útiles de Administración
+##  Comandos Útiles de Administración
 
 ### Ver logs en tiempo real:
 ```bash
