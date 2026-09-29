@@ -38,14 +38,11 @@ Módulo administrativo para la creación y despacho de traslados, vinculando la 
 
 ## Demostración en Video del Proyecto
 
-A continuación se presentan las grabaciones en video del ecosistema **SmartCase** en operación real (adquisición de telemetría con sensores ESP32, control activo y sincronización con la aplicación multiplataforma):
+A continuación se presentan las grabaciones en video del ecosistema **SmartCase** en operación real (adquisición de telemetría con sensores ESP32, control activo y sincronización con la aplicación multiplataforma)
 
 | Video 1: Hardware IoT y Sensores en Tiempo Real | Video 2: Flujo Operativo y Plataforma de Software |
 | :---: | :---: |
-| [![Demostración Hardware ESP32](https://img.youtube.com/vi/ID_VIDEO_1/maxresdefault.jpg)](https://www.youtube.com/watch?v=ID_VIDEO_1)<br><sub>*(Clic para reproducir en YouTube)*</sub> | [![Demostración Software y Monitoreo](https://img.youtube.com/vi/ID_VIDEO_2/maxresdefault.jpg)](https://www.youtube.com/watch?v=ID_VIDEO_2)<br><sub>*(Clic para reproducir en YouTube)*</sub> |
-
-> [!TIP]
-> Para vincular tus videos, reemplaza `ID_VIDEO_1` e `ID_VIDEO_2` por los IDs correspondientes de tus videos subidos en YouTube.
+| [![Demostración Hardware ESP32](https://img.youtube.com/vi/ID_VIDEO_1/maxresdefault.jpg)](https://www.youtube.com/shorts/6uKfYQwUj50)<br><sub>*(Clic para reproducir en YouTube)*</sub> | [![Demostración Software y Monitoreo](https://img.youtube.com/vi/ID_VIDEO_2/maxresdefault.jpg)](https://www.youtube.com/shorts/SvyIqlychT4)<br><sub>*(Clic para reproducir en YouTube)*</sub> |
 
 ---
 
